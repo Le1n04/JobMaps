@@ -1,0 +1,68 @@
+<div class="map-wrapper">
+  <div id="map"></div>
+
+  <!-- Capa de lista que solo se muestra en modo 'list' -->
+  <div class="list-overlay" *ngIf="view === 'list'">
+    <div class="job-card" *ngFor="let job of jobs">
+      <img [src]="job.logo" alt="Logo empresa" />
+      <div class="info">
+        <h3>{{ job.empresa }}</h3>
+        <p>{{ job.puesto }}</p>
+        <div class="meta">
+          <span>{{ job.fecha }}</span>
+          <span>{{ job.distancia }} km</span>
+        </div>
+      </div>
+      <div class="salario">{{ job.salario }} €</div>
+    </div>
+  </div>
+
+  <!-- Superposición superior -->
+  <div class="overlay top-overlay">
+    <div class="search-bar">
+      <input type="text" placeholder="Search" />
+      <button><mat-icon>settings</mat-icon></button>
+    </div>
+
+    <div class="view-toggle">
+      <button [class.active]="view === 'list'" (click)="view = 'list'">
+        List
+      </button>
+      <button [class.active]="view === 'map'" (click)="view = 'map'">
+        Map
+      </button>
+    </div>
+  </div>
+
+  <!-- Menú inferior -->
+  <div class="overlay bottom-nav">
+    <button
+      [class.active]="activeTab === 'browse'"
+      (click)="setActiveTab('browse')"
+    >
+      <mat-icon>search</mat-icon>
+      <span>Browse</span>
+    </button>
+    <button
+      [class.active]="activeTab === 'favourites'"
+      (click)="setActiveTab('favourites')"
+    >
+      <mat-icon>favorite</mat-icon>
+      <span>Favourites</span>
+    </button>
+    <button
+      [class.active]="activeTab === 'notifications'"
+      (click)="setActiveTab('notifications')"
+    >
+      <mat-icon>notifications</mat-icon>
+      <span>Notifications</span>
+    </button>
+    <button
+      [class.active]="activeTab === 'profile'"
+      (click)="setActiveTab('profile')"
+    >
+      <mat-icon>person</mat-icon>
+      <span>Profile</span>
+    </button>
+  </div>
+</div>

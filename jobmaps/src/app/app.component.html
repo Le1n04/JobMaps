@@ -1,8 +1,11 @@
-<nav>
-  <a routerLink="/login">Login</a> |
-  <a routerLink="/registro">Registro</a>
-</nav>
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer mode="over" class="sidenav" (closedStart)="close()">
+    <app-sidebar></app-sidebar>
+  </mat-sidenav>
 
-<hr />
-
-<router-outlet></router-outlet>
+  <mat-sidenav-content>
+    <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
