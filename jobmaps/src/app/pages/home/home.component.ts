@@ -47,7 +47,6 @@ export class HomeComponent implements AfterViewInit {
     }
   ];
   
-
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
     private jobService: JobService
@@ -59,7 +58,7 @@ export class HomeComponent implements AfterViewInit {
     if (!this.isBrowser) return;
 
     const L = await import('leaflet');
-    const map = L.map('map').setView([36.7213, -4.4214], 13);
+    const map = L.map('map', { zoomControl: false}).setView([36.7213, -4.4214], 13);
 
     L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap contributors &copy; Carto',
@@ -67,8 +66,6 @@ export class HomeComponent implements AfterViewInit {
       maxZoom: 19
     }).addTo(map);
     
-
-    // cuando tengas coords reales en los jobs
     this.jobs.forEach(job => {
       if (job.lat && job.lng) {
         const icon = L.icon({
