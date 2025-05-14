@@ -1,7 +1,15 @@
-<h2>Iniciar sesión</h2>
- 
-<form (ngSubmit)="login()" #loginForm="ngForm">
-  <input type="email" name="email" [(ngModel)]="email" placeholder="Email" required />
-  <input type="password" name="contraseña" [(ngModel)]="password" placeholder="password" required />
-  <button type="submit">Entrar</button>
-</form>
+<div class="login-container">
+    <h1>Let's get started<br />finding your job!</h1>
+  
+    <img src="https://simpleicons.org/icons/gmail.svg" alt="JobMaps logo" class="logo" />
+  
+    <button class="google-btn">
+      <img src="https://simpleicons.org/icons/google.svg" alt="Google" />
+      Continue with Gmail
+    </button>
+  
+    <button class="email-btn">
+      Continue with email
+    </button>
+  </div>
+  

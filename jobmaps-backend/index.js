@@ -1,22 +1,17 @@
-require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
+const connectDB = require('./db');
 const dotenv = require('dotenv');
-const mongoose = require('mongoose');
-const authRoutes = require('./routes/auth.routes.js');
-const app = express();
+const cors = require('cors');
 
 dotenv.config();
-app.use(cors());
+connectDB();
+
+const app = express();
+app.use(cors()); // permite acceso desde Angular
 app.use(express.json());
 
-app.use('/api', require('./routes/auth.routes.js'));
+app.use('/api/usuarios', require('./routes/usuarios.routes'));
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('Conectado a MongoDB');
-    app.listen(process.env.PORT, () => {
-      console.log(`Servidor en http://localhost:${process.env.PORT}`);
-    });
-  })
-  .catch(err => console.error(err));
+app.listen(3000, () => {
+  console.log('Servidor en http://localhost:3000');
+});

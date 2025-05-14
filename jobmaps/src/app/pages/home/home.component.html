@@ -9,7 +9,7 @@
         <h3>{{ job.empresa }}</h3>
         <p>{{ job.puesto }}</p>
         <div class="meta">
-          <span>{{ job.fecha }}</span>
+          <span>{{ job.fecha | date:'d MMMM y' }}</span>
           <span>{{ job.distancia }} km</span>
         </div>
       </div>
