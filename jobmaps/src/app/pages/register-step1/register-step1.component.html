@@ -1,0 +1,54 @@
+<div class="register-step1-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="back-container">
+      <button class="back-btn" (click)="goBack()">←</button>
+    </div>
+    <div class="title-container">
+      <span class="header-title">Create your account</span>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- Formulario -->
+  <div class="form-field">
+    <label for="name">Full name</label>
+    <input
+      id="name"
+      type="text"
+      [(ngModel)]="fullName"
+      placeholder="Your name"
+    />
+  </div>
+
+  <div class="form-field">
+    <label for="age">Age</label>
+    <input id="age" type="number" [(ngModel)]="age" placeholder="Your age" />
+  </div>
+
+  <div class="form-field">
+    <label for="country">Country</label>
+    <select id="country" [(ngModel)]="country">
+      <option value="" disabled selected>Select your country</option>
+      <option value="Spain">Spain</option>
+      <option value="France">France</option>
+      <option value="Germany">Germany</option>
+      <option value="Other">Other</option>
+    </select>
+  </div>
+
+  <!-- Checkbox fuera del form-field -->
+  <div class="checkbox-group">
+    <input type="checkbox" id="terms" [(ngModel)]="acceptedTerms" />
+    <label for="terms">I accept the Terms of Use and Cookies</label>
+  </div>
+
+  <!-- Botón también fuera -->
+  <button
+    [disabled]="!formValid"
+    [class.valid]="formValid"
+    (click)="continue()"
+  >
+    Continue
+  </button>
+</div>

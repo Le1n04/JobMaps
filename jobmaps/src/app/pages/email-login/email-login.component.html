@@ -1,0 +1,22 @@
+<div class="email-login-container">
+  <div class="header">
+    <div class="back-container">
+      <button class="back-btn" (click)="goBack()">←</button>
+    </div>
+    <div class="title-container">
+      <span class="header-title">Let's get started</span>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <label>Email</label>
+  <input type="email" [(ngModel)]="email" placeholder="What's your email" />
+
+  <button
+    (click)="continuar()"
+    [disabled]="!isEmailValid"
+    [class.valid]="isEmailValid"
+  >
+    Continue
+  </button>
+</div>

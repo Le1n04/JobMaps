@@ -1,14 +1,14 @@
 <div class="login-container">
-    <h1>Let's get started<br />finding your job!</h1>
+    <h1>Let's get started<br />finding a job!</h1>
   
-    <img src="https://simpleicons.org/icons/gmail.svg" alt="JobMaps logo" class="logo" />
+    <img src="assets/jobmaps.png" alt="JobMaps logo" class="logo" />
   
-    <button class="google-btn">
+    <button class="google-btn" (click)="loginWithGoogle()">
       <img src="https://simpleicons.org/icons/google.svg" alt="Google" />
       Continue with Gmail
     </button>
   
-    <button class="email-btn">
+    <button class="email-btn" [routerLink]="['/email-login']">
       Continue with email
     </button>
   </div>
