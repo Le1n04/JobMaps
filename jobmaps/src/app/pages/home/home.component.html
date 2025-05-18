@@ -71,4 +71,14 @@
       Cerrar sesión
     </button>
   </div>
+
+  <!-- Botón flotante solo visible para EMPRESA -->
+  <button
+    *ngIf="isEmpresa"
+    class="fab"
+    (click)="abrirFormularioOferta()"
+    aria-label="Añadir oferta"
+  >
+    +
+  </button>
 </div>

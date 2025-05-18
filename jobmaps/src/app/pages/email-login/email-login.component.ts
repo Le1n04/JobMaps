@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserService } from '../../services/user.service';
+import { Auth, fetchSignInMethodsForEmail } from '@angular/fire/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 @Component({
   selector: 'app-email-login',
@@ -14,26 +15,39 @@ import { UserService } from '../../services/user.service';
 export class EmailLoginComponent {
   email: string = '';
 
-  constructor(
-    private router: Router,
-    private userService: UserService // 👈 Inyectar servicio
-  ) {}
+  constructor(private router: Router, private auth: Auth) {}
 
   goBack() {
     this.router.navigate(['/login']);
   }
 
-  continuar() {
+  async continuar() {
     if (!this.email) return;
 
-    // 👉 Guardamos el email en el servicio
-    this.userService.email = this.email;
+    try {
+      // Intenta iniciar sesión con contraseña vacía (nunca funcionará, pero sirve para detectar si existe el usuario)
+      await signInWithEmailAndPassword(this.auth, this.email, '');
+    } catch (error: any) {
+      const code = error.code;
+      console.log('Código de error:', code);
 
-    // Simulación: si contiene "user" es un usuario registrado
-    if (this.email.includes('user')) {
-      this.router.navigate(['/email-password'], { queryParams: { email: this.email } });
-    } else {
-      this.router.navigate(['/register-step1'], { queryParams: { email: this.email } });
+      if (code === 'auth/user-not-found') {
+        // Email no existe → registro
+        this.router.navigate(['/register-step1'], {
+          queryParams: { email: this.email },
+        });
+      } else if (
+        code === 'auth/wrong-password' ||
+        code === 'auth/missing-password'
+      ) {
+        // Usuario existe → login con contraseña
+        this.router.navigate(['/email-password'], {
+          queryParams: { email: this.email },
+        });
+      } else {
+        console.error('Error desconocido:', error);
+        alert('No se pudo comprobar el email. Inténtalo más tarde.');
+      }
     }
   }
 

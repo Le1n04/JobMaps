@@ -37,6 +37,15 @@
     </select>
   </div>
 
+  <div>
+    <label for="role">User type</label>
+    <select id="role" [(ngModel)]="role">
+      <option value="" disabled selected>Select role</option>
+      <option value="empresa">Company</option>
+      <option value="desempleado">Job Seeker</option>
+    </select>
+  </div>
+
   <!-- Checkbox fuera del form-field -->
   <div class="checkbox-group">
     <input type="checkbox" id="terms" [(ngModel)]="acceptedTerms" />

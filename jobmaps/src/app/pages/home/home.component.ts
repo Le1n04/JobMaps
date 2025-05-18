@@ -3,6 +3,7 @@ import { isPlatformBrowser, NgIf, NgFor, CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { JobService, Job } from '../../services/job.service';
 import { AuthService } from '../../services/auth.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-home',
@@ -51,7 +52,8 @@ export class HomeComponent implements AfterViewInit {
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
     private jobService: JobService,
-    private authService: AuthService
+    private authService: AuthService,
+    private userService: UserService
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
   }
@@ -60,10 +62,8 @@ export class HomeComponent implements AfterViewInit {
     if (!this.isBrowser) return;
 
     const L = await import('leaflet');
-    const map = L.map('map', { zoomControl: false }).setView(
-      [36.7213, -4.4214],
-      13
-    );
+    const { lat, lng } = this.userService.location;
+    const map = L.map('map').setView([lat, lng], 13);
 
     L.tileLayer(
       'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
@@ -78,7 +78,7 @@ export class HomeComponent implements AfterViewInit {
       if (job.lat && job.lng) {
         const icon = L.icon({
           iconUrl: job.logo,
-          iconSize: [40, 40], // tamaño del icono
+          iconSize: [30, 30], // tamaño del icono
           iconAnchor: [20, 40], // punto "base" del icono (abajo centro)
           popupAnchor: [0, -40], // posición del popup con respecto al icono
           className: 'custom-marker',
@@ -91,12 +91,25 @@ export class HomeComponent implements AfterViewInit {
     });
   }
 
+  abrirFormularioOferta() {
+    console.log('Abrir modal para nueva oferta');
+    // Más adelante puedes redirigir o abrir un modal
+  }
+
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
 
   ngOnInit(): void {
     //this.loadJobs();
+  }
+
+  get isEmpresa() {
+    return this.userService.role === 'empresa';
+  }
+
+  get isDesempleado() {
+    return this.userService.role === 'desempleado';
   }
 
   logout() {

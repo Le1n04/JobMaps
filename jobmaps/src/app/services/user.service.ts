@@ -10,6 +10,7 @@ export class UserService {
     age?: number;
     country?: string;
     acceptedTerms?: boolean;
+    role?: 'empresa' | 'desempleado';
     location?: {
       lat: number;
       lng: number;
@@ -22,6 +23,14 @@ export class UserService {
 
   get email() {
     return this._userData.email ?? 'no@email.error';
+  }
+
+  set role(role: 'empresa' | 'desempleado') {
+    this._userData.role = role;
+  }
+
+  get role(): 'empresa' | 'desempleado' {
+    return this._userData.role ?? 'desempleado'; // por defecto, si no se ha establecido
   }
 
   set fullName(name: string) {
