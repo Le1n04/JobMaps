@@ -33,6 +33,12 @@ export const routes: Routes = [
     canActivate: [registrationFlowGuard],
   },
   {
+    path: 'profile-settings',
+    loadComponent: () =>
+      import('./pages/profile-settings/profile-settings.component').then(m => m.ProfileSettingsComponent),
+    canActivate: [authGuard]
+  },  
+  {
     path: 'register-step1',
     loadComponent: () =>
       import('./pages/register-step1/register-step1.component').then(

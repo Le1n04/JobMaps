@@ -1,0 +1,41 @@
+<div class="profile-container">
+  <div class="header">
+    <button class="back-btn" (click)="goBack()">←</button>
+    <span class="header-title">Profile</span>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="profile-avatar">
+    <div class="avatar-circle">Profile photo</div>
+    <p class="name">{{ fullName }}</p>
+  </div>
+
+  <form (ngSubmit)="saveChanges()" class="profile-form">
+    <label>Name*</label>
+    <input type="text" [(ngModel)]="fullName" name="name" />
+
+    <label>Email</label>
+    <input type="email" [value]="email" disabled />
+
+    <label>Age</label>
+    <input type="number" [(ngModel)]="age" name="age" />
+
+    <label>Role</label>
+    <select [(ngModel)]="role" name="role">
+      <option value="empresa">Empresa</option>
+      <option value="desempleado">Desempleado</option>
+    </select>
+
+    <label>Location</label>
+    <div class="location-row">
+      <input type="text" [value]="country" disabled />
+      <button type="button" (click)="changeLocation()">Change</button>
+    </div>
+
+    <button type="submit" class="submit-btn">SUBMIT</button>
+  </form>
+
+  <button (click)="logout()" style="position: absolute; top: 16px; right: 16px">
+    Cerrar sesión
+  </button>
+</div>

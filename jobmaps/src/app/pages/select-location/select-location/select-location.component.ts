@@ -1,6 +1,6 @@
 import { Component, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { CommonModule, Location } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as L from 'leaflet';
 import { UserService } from '../../../services/user.service';
 
@@ -9,35 +9,72 @@ import { UserService } from '../../../services/user.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './select-location.component.html',
-  styleUrls: ['./select-location.component.scss']
+  styleUrls: ['./select-location.component.scss'],
 })
 export class SelectLocationComponent implements AfterViewInit {
   private map!: L.Map;
   private marker!: L.Marker;
+  from: string = '';
 
-  constructor(private router: Router, private userService: UserService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private userService: UserService,
+    private location : Location,
+  ) {}
+
+  ngOnInit() {
+    this.route.queryParams.subscribe((params) => {
+      this.from = params['from'] || '';
+    });
+  }
 
   ngAfterViewInit(): void {
-    // Define un icono personalizado
     const customIcon = L.icon({
       iconUrl: 'assets/marker.png',
       iconSize: [32, 32],
       iconAnchor: [16, 32],
-      popupAnchor: [0, -32]
+      popupAnchor: [0, -32],
     });
 
-    this.map = L.map('manual-map').setView([36.7213, -4.4214], 13); // Málaga por defecto
+    // Fallback: Málaga
+    const fallbackCoords: L.LatLngExpression = [36.7213, -4.4214];
 
-    L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(this.map);
+    // Iniciar mapa sin centrar aún
+    this.map = L.map('manual-map');
 
-    // Usa el icono personalizado
-    this.marker = L.marker([36.7213, -4.4214], {
-      draggable: true,
-      icon: customIcon
-    }).addTo(this.map);
+    // Capa base
+    L.tileLayer(
+      'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
+      {
+        attribution: '&copy; OpenStreetMap contributors',
+      }
+    ).addTo(this.map);
 
+    // Intentar geolocalización
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords: L.LatLngExpression = [
+          position.coords.latitude,
+          position.coords.longitude,
+        ];
+        this.map.setView(coords, 14);
+        this.marker = L.marker(coords, {
+          draggable: true,
+          icon: customIcon,
+        }).addTo(this.map);
+      },
+      () => {
+        // Si falla la geolocalización, usar Málaga
+        this.map.setView(fallbackCoords, 13);
+        this.marker = L.marker(fallbackCoords, {
+          draggable: true,
+          icon: customIcon,
+        }).addTo(this.map);
+      }
+    );
+
+    // Al hacer clic en el mapa, mover el marcador
     this.map.on('click', (e: L.LeafletMouseEvent) => {
       this.marker.setLatLng(e.latlng);
     });
@@ -46,10 +83,15 @@ export class SelectLocationComponent implements AfterViewInit {
   confirmarUbicacion() {
     const coords = this.marker.getLatLng();
     this.userService.setLocation(coords.lat, coords.lng);
-    this.router.navigate(['/register-password']);
+
+    if (this.from === 'profile') {
+      this.router.navigate(['/profile-settings']);
+    } else {
+      this.router.navigate(['/register-password']);
+    }
   }
 
   goBack() {
-    this.router.navigate(['/register-location']);
+    this.location.back();
   }
 }

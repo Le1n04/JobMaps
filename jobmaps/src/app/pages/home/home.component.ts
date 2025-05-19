@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { JobService, Job } from '../../services/job.service';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -53,7 +54,8 @@ export class HomeComponent implements AfterViewInit {
     @Inject(PLATFORM_ID) platformId: Object,
     private jobService: JobService,
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private router: Router,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
   }
@@ -98,6 +100,11 @@ export class HomeComponent implements AfterViewInit {
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
+
+    if (tab === 'profile')
+    {
+      this.router.navigate(['/profile-settings']);
+    }
   }
 
   ngOnInit(): void {

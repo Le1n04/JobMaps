@@ -2,8 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Auth, fetchSignInMethodsForEmail } from '@angular/fire/auth';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  Auth,
+  fetchSignInMethodsForEmail,
+  getAuth,
+  signInWithEmailAndPassword,
+} from '@angular/fire/auth';
 
 @Component({
   selector: 'app-email-login',
@@ -21,34 +25,20 @@ export class EmailLoginComponent {
     this.router.navigate(['/login']);
   }
 
-  async continuar() {
-    if (!this.email) return;
-
-    try {
-      // Intenta iniciar sesión con contraseña vacía (nunca funcionará, pero sirve para detectar si existe el usuario)
-      await signInWithEmailAndPassword(this.auth, this.email, '');
-    } catch (error: any) {
-      const code = error.code;
-      console.log('Código de error:', code);
-
-      if (code === 'auth/user-not-found') {
-        // Email no existe → registro
-        this.router.navigate(['/register-step1'], {
-          queryParams: { email: this.email },
-        });
-      } else if (
-        code === 'auth/wrong-password' ||
-        code === 'auth/missing-password'
-      ) {
-        // Usuario existe → login con contraseña
-        this.router.navigate(['/email-password'], {
-          queryParams: { email: this.email },
-        });
-      } else {
-        console.error('Error desconocido:', error);
-        alert('No se pudo comprobar el email. Inténtalo más tarde.');
-      }
-    }
+  checkEmail() {
+    fetchSignInMethodsForEmail(this.auth, this.email)
+      .then((methods) => {
+        if (methods.length > 0) {
+          // El email ya existe en Firebase Auth
+          this.router.navigate(['/email-password'], { queryParams: {email: this.email } });
+        } else {
+          // El email no está registrado
+          this.router.navigate(['/register-step1'], { queryParams: { email:this.email } });
+        }
+      })
+      .catch((error) => {
+        console.error('Error al comprobar el email:', error);
+      });
   }
 
   get isEmailValid(): boolean {
