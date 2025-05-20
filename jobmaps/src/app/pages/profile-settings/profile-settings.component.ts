@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './profile-settings.component.html',
-  styleUrls: ['./profile-settings.component.scss']
+  styleUrls: ['./profile-settings.component.scss'],
 })
 export class ProfileSettingsComponent {
   fullName = '';
@@ -22,7 +23,8 @@ export class ProfileSettingsComponent {
   constructor(
     private authService: AuthService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private prevLocation: Location,
   ) {
     // Cargar datos actuales
     this.fullName = this.userService.fullName;
@@ -48,7 +50,9 @@ export class ProfileSettingsComponent {
         age: this.age,
         country: this.country,
         role: this.role,
+        location: this.userService.location, // ✅ aquí está la clave
       });
+
       alert('✅ Cambios guardados correctamente.');
     } catch (err) {
       console.error('❌ Error al guardar en Firestore:', err);
@@ -57,10 +61,17 @@ export class ProfileSettingsComponent {
   }
 
   cambiarUbicacion() {
-    this.router.navigate(['/select-location']);
+    this.router.navigate(['/select-location'], {
+      queryParams: { from: 'profile' },
+    });
   }
 
   logout() {
     this.authService.logout();
+  }
+
+  goBack()
+  {
+    this.prevLocation.back();
   }
 }

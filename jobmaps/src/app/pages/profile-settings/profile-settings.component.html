@@ -1,6 +1,7 @@
 <div class="profile-container">
   <!-- Header -->
   <div class="header">
+    <button class="back-btn" (click)="goBack()">←</button>
     <div class="title">Perfil</div>
     <button class="logout-btn" (click)="logout()">Cerrar sesión</button>
   </div>
@@ -8,10 +9,23 @@
   <!-- Formulario de datos personales -->
   <form (ngSubmit)="guardarCambios()" #form="ngForm">
     <label for="fullName">Nombre completo</label>
-    <input id="fullName" type="text" [(ngModel)]="fullName" name="fullName" required />
+    <input
+      id="fullName"
+      type="text"
+      [(ngModel)]="fullName"
+      name="fullName"
+      required
+    />
 
     <label for="age">Edad</label>
-    <input id="age" type="number" [(ngModel)]="age" name="age" required min="1" />
+    <input
+      id="age"
+      type="number"
+      [(ngModel)]="age"
+      name="age"
+      required
+      min="1"
+    />
 
     <label for="country">País</label>
     <select id="country" [(ngModel)]="country" name="country" required>
@@ -34,9 +48,17 @@
       <span class="location">
         Lat: {{ location.lat }}, Lng: {{ location.lng }}
       </span>
-      <button type="button" class="edit-location-btn" (click)="cambiarUbicacion()">Cambiar</button>
+      <button
+        type="button"
+        class="edit-location-btn"
+        (click)="cambiarUbicacion()"
+      >
+        Cambiar
+      </button>
     </div>
 
-    <button type="submit" class="save-btn" [disabled]="form.invalid">Guardar cambios</button>
+    <button type="submit" class="save-btn" [disabled]="form.invalid">
+      Guardar cambios
+    </button>
   </form>
 </div>

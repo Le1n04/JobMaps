@@ -14,18 +14,20 @@ import { UserService } from '../../../services/user.service';
 export class SelectLocationComponent implements AfterViewInit {
   private map!: L.Map;
   private marker!: L.Marker;
-  from: string = '';
+  from: 'profile' | 'register' = 'register';
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private userService: UserService,
-    private location : Location,
+    private location: Location
   ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
-      this.from = params['from'] || '';
+      if (params['from'] === 'profile') {
+        this.from = 'profile';
+      }
     });
   }
 
@@ -37,13 +39,10 @@ export class SelectLocationComponent implements AfterViewInit {
       popupAnchor: [0, -32],
     });
 
-    // Fallback: Málaga
     const fallbackCoords: L.LatLngExpression = [36.7213, -4.4214];
 
-    // Iniciar mapa sin centrar aún
     this.map = L.map('manual-map');
 
-    // Capa base
     L.tileLayer(
       'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
       {
@@ -51,7 +50,6 @@ export class SelectLocationComponent implements AfterViewInit {
       }
     ).addTo(this.map);
 
-    // Intentar geolocalización
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const coords: L.LatLngExpression = [
@@ -65,7 +63,6 @@ export class SelectLocationComponent implements AfterViewInit {
         }).addTo(this.map);
       },
       () => {
-        // Si falla la geolocalización, usar Málaga
         this.map.setView(fallbackCoords, 13);
         this.marker = L.marker(fallbackCoords, {
           draggable: true,
@@ -74,7 +71,6 @@ export class SelectLocationComponent implements AfterViewInit {
       }
     );
 
-    // Al hacer clic en el mapa, mover el marcador
     this.map.on('click', (e: L.LeafletMouseEvent) => {
       this.marker.setLatLng(e.latlng);
     });

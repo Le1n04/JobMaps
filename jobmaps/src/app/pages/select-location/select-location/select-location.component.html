@@ -8,6 +8,6 @@
   <div id="manual-map"></div>
 
   <button class="confirm-btn" (click)="confirmarUbicacion()">
-    Confirm location
+    {{ from === 'profile' ? 'Save location' : 'Confirm location' }}
   </button>
 </div>
