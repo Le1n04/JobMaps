@@ -1,144 +1,76 @@
 .profile-container {
-  padding: 1.5rem;
-  max-width: 500px;
+  padding: 1.5rem clamp(1rem, 4vw, 2rem);
+  font-family: 'Roboto', sans-serif;
+  max-width: 420px;
   margin: 0 auto;
-
-  h2 {
-    text-align: center;
-    margin-bottom: 1.5rem;
-  }
-
-  .profile-avatar {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 2rem;
-
-    .avatar-circle {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border: 2px solid #3f51b5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      color: #3f51b5;
-    }
-
-    .name {
-      margin-top: 0.8rem;
-      color: #333;
-      font-weight: 600;
-    }
-  }
 
   .header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    height: 60px;
-    padding: 1rem;
+    align-items: center;
+    margin-bottom: 2rem;
 
-    .back-btn {
+    .title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .logout-btn {
       background: none;
       border: none;
-      font-size: 1.5rem;
+      color: #00796b;
       cursor: pointer;
-      color: black;
-    }
-
-    .header-title {
-      flex: 1;
-      text-align: center;
-      font-weight: 600;
-      font-size: 1.25rem;
-    }
-
-    .spacer {
-      width: 40px;
+      font-size: 1rem;
+      font-weight: 500;
     }
   }
 
-  .logout-btn {
-    margin: 2rem auto 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 0.75rem 1.5rem;
-    font-weight: 500;
-    color: #d32f2f;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-  }
-
-  .profile-form {
+  form {
     display: flex;
     flex-direction: column;
+    gap: 1.2rem;
 
     label {
-      margin-top: 1rem;
-      font-weight: 600;
-      color: #333;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
     }
-
-    input,
-    select {
-      padding: 0.6rem;
-      border: none;
-      border-bottom: 1px solid #ccc;
+    input, select {
+      padding: 0.7rem;
+      border-radius: 12px;
+      border: 1px solid #ccc;
       font-size: 1rem;
-      background-color: transparent;
-
-      &:disabled {
-        color: #999;
-        background-color: #f2f2f2;
-      }
-
-      &:focus {
-        border-color: #3f51b5;
-        outline: none;
-      }
+      margin-bottom: 0.5rem;
     }
-
     .location-row {
       display: flex;
-      gap: 0.5rem;
       align-items: center;
-
-      input {
-        flex: 1;
+      gap: 0.5rem;
+      .location {
+        font-size: 0.95rem;
+        color: #666;
       }
-
-      button {
-        padding: 0.5rem 1rem;
-        background-color: #3f51b5;
-        color: white;
+      .edit-location-btn {
+        background: #e0e0e0;
         border: none;
-        border-radius: 0.4rem;
+        border-radius: 12px;
+        padding: 0.45rem 1rem;
         cursor: pointer;
-
-        &:hover {
-          background-color: #2c3e99;
-        }
+        font-weight: 500;
+        margin-left: auto;
       }
     }
-
-    .submit-btn {
-      margin-top: 2rem;
-      padding: 0.9rem;
-      font-size: 1rem;
-      background-color: #000;
+    .save-btn {
+      background-color: #00796b;
       color: white;
       border: none;
-      border-radius: 1rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.75rem;
+      margin-top: 1.5rem;
       cursor: pointer;
-
+      transition: background 0.2s;
       &:hover {
-        background-color: #222;
+        background-color: #00574b;
       }
     }
   }

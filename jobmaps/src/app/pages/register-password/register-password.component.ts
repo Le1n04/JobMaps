@@ -31,14 +31,28 @@ export class RegisterPasswordComponent {
     const fullName = this.userService.fullName;
 
     try {
+      // 1. Crear usuario en Firebase Auth
       const result = await createUserWithEmailAndPassword(this.auth, email, this.password);
       await updateProfile(result.user, { displayName: fullName });
-      console.log('Usuario creado correctamente:', result.user);
 
-      // Aquí podrías redirigir al home o al siguiente paso
+      // 2. Crear documento en Firestore
+      const uid = result.user.uid;
+      const userData = {
+        fullName: this.userService.fullName,
+        age: this.userService.age,
+        country: this.userService.country,
+        role: this.userService.role,
+        acceptedTerms: this.userService.acceptedTerms,
+        location: this.userService.location,
+      };
+      console.log('🔍 fullName antes de crear Firestore:', this.userService.fullName);
+
+      await this.userService.createUserDocument(uid, userData);
+
+      console.log('✅ Usuario creado y documento guardado en Firestore');
       this.router.navigate(['/home']);
     } catch (error: any) {
-      console.error('Error al crear el usuario:', error);
+      console.error('❌ Error al crear el usuario:', error);
       this.error = error.message;
     }
   }

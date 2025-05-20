@@ -1,41 +1,42 @@
 <div class="profile-container">
+  <!-- Header -->
   <div class="header">
-    <button class="back-btn" (click)="goBack()">←</button>
-    <span class="header-title">Profile</span>
-    <div class="spacer"></div>
+    <div class="title">Perfil</div>
+    <button class="logout-btn" (click)="logout()">Cerrar sesión</button>
   </div>
 
-  <div class="profile-avatar">
-    <div class="avatar-circle">Profile photo</div>
-    <p class="name">{{ fullName }}</p>
-  </div>
+  <!-- Formulario de datos personales -->
+  <form (ngSubmit)="guardarCambios()" #form="ngForm">
+    <label for="fullName">Nombre completo</label>
+    <input id="fullName" type="text" [(ngModel)]="fullName" name="fullName" required />
 
-  <form (ngSubmit)="saveChanges()" class="profile-form">
-    <label>Name*</label>
-    <input type="text" [(ngModel)]="fullName" name="name" />
+    <label for="age">Edad</label>
+    <input id="age" type="number" [(ngModel)]="age" name="age" required min="1" />
 
-    <label>Email</label>
-    <input type="email" [value]="email" disabled />
+    <label for="country">País</label>
+    <select id="country" [(ngModel)]="country" name="country" required>
+      <option value="" disabled selected>Selecciona tu país</option>
+      <option value="Spain">España</option>
+      <option value="France">Francia</option>
+      <option value="Germany">Alemania</option>
+      <option value="Other">Otro</option>
+    </select>
 
-    <label>Age</label>
-    <input type="number" [(ngModel)]="age" name="age" />
-
-    <label>Role</label>
-    <select [(ngModel)]="role" name="role">
+    <label for="role">Tipo de usuario</label>
+    <select id="role" [(ngModel)]="role" name="role" required>
       <option value="empresa">Empresa</option>
       <option value="desempleado">Desempleado</option>
     </select>
 
-    <label>Location</label>
+    <!-- Ubicación -->
     <div class="location-row">
-      <input type="text" [value]="country" disabled />
-      <button type="button" (click)="changeLocation()">Change</button>
+      <label>Ubicación</label>
+      <span class="location">
+        Lat: {{ location.lat }}, Lng: {{ location.lng }}
+      </span>
+      <button type="button" class="edit-location-btn" (click)="cambiarUbicacion()">Cambiar</button>
     </div>
 
-    <button type="submit" class="submit-btn">SUBMIT</button>
+    <button type="submit" class="save-btn" [disabled]="form.invalid">Guardar cambios</button>
   </form>
-
-  <button (click)="logout()" style="position: absolute; top: 16px; right: 16px">
-    Cerrar sesión
-  </button>
 </div>

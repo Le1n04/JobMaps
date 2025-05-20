@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
 import { getAuth, onAuthStateChanged, User } from '@angular/fire/auth';
-import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  getFirestore,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +26,9 @@ export class UserService {
     };
   } = {};
 
+  private _uid: string = '';
+  private userData$ = new BehaviorSubject(this._userData);
+
   constructor() {
     this.loadUserFromFirebase();
   }
@@ -29,8 +39,11 @@ export class UserService {
 
     onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
+        this._uid = user.uid;
         this._userData.email = user.email ?? 'no@email.error';
-        this._userData.fullName = user.displayName ?? 'Sin nombre';
+        if (!this._userData.fullName && user.displayName) {
+          this._userData.fullName = user.displayName;
+        }
 
         const docRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(docRef);
@@ -46,14 +59,45 @@ export class UserService {
           };
           this._userData.acceptedTerms = data['acceptedTerms'] ?? false;
         }
+
+        this.userData$.next(this._userData); // Notificar a los observadores
       } else {
         console.warn('No user logged in');
       }
     });
   }
 
-  // Getters y setters igual que los tuyos:
+  // 🔁 Observable (opcional)
+  get userDataObservable() {
+    return this.userData$.asObservable();
+  }
 
+  async createUserDocument(uid: string, data: any) {
+    const db = getFirestore();
+    const userRef = doc(db, 'users', uid);
+    await setDoc(userRef, data);
+  }
+
+  // 🔐 UID del usuario actual
+  get uid() {
+    return this._uid;
+  }
+
+  // 💾 Actualizar Firestore
+  async updateUserInFirestore(
+    uid: string,
+    newData: Partial<typeof this._userData>
+  ) {
+    const db = getFirestore();
+    const docRef = doc(db, 'users', uid);
+    await updateDoc(docRef, newData);
+
+    // También actualizamos localmente
+    this._userData = { ...this._userData, ...newData };
+    this.userData$.next(this._userData);
+  }
+
+  // Getters y setters
   set email(email: string) {
     this._userData.email = email;
   }
@@ -116,5 +160,7 @@ export class UserService {
 
   clear() {
     this._userData = {};
+    this._uid = '';
+    this.userData$.next(this._userData);
   }
 }
