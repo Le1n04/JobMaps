@@ -1,63 +1,149 @@
 import { Component, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, NgIf, NgFor, CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { JobService, Job } from '../../services/job.service';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
+import { JobService, Oferta } from '../../services/job.service';
+import { FormsModule } from '@angular/forms';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
-  imports: [MatIconModule, NgIf, NgFor, CommonModule],
+  imports: [MatIconModule, NgIf, NgFor, CommonModule, FormsModule],
 })
 export class HomeComponent implements AfterViewInit {
   view: 'map' | 'list' = 'map';
   activeTab: string = 'browse';
   isBrowser: boolean;
-  jobs: Job[] = [
-    {
-      empresa: 'Cepsa',
-      puesto: 'Dependiente gasolinera',
-      distancia: 1.3,
-      salario: 950,
-      fecha: '2025-05-13T10:00:00Z',
-      logo: 'https://cdn.worldvectorlogo.com/logos/cepsa-2.svg',
-      lat: 36.7205,
-      lng: -4.4193,
-    },
-    {
-      empresa: 'Mercadona',
-      puesto: 'Reponedor/a',
-      distancia: 0.7,
-      salario: 1050,
-      fecha: '2025-05-30T10:00:00Z',
-      logo: 'https://yt3.googleusercontent.com/ZrOQvWBGq2XrPuAzhwJp-UNjAEsHlfCBPN-8QCzsY9zjPrXRWW0IS4D6wK6KiP1SIGU6_2wqnw=s900-c-k-c0x00ffffff-no-rj',
-      lat: 36.7228,
-      lng: -4.4209,
-    },
-    {
-      empresa: 'Burger King',
-      puesto: 'Cocinero/a',
-      distancia: 0.5,
-      salario: 950,
-      fecha: '2025-05-29T10:00:00Z',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Burger_King_logo_%281999%E2%80%932020%29.svg/250px-Burger_King_logo_%281999%E2%80%932020%29.svg.png',
-      lat: 36.7239,
-      lng: -4.4171,
-    },
-  ];
+  mostrarPopup = false;
+  map!: any;
+  marcadores: any[] = [];
+
+  // Campos del formulario
+  direccionTexto: string = '';
+  direccionInvalida = false;
+
+  titulo: string = '';
+  descripcion: string = '';
+  salario: number = 0;
+  tipoContrato: string = '';
+  inicio: string = '';
+  logoUrl: string = '';
+  jobs: Oferta[] = [];
 
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
     private jobService: JobService,
     private authService: AuthService,
     private userService: UserService,
-    private router: Router,
+    private router: Router
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
+  }
+
+  async convertirDireccionACoordenadas(
+    direccion: string
+  ): Promise<{ lat: number; lng: number } | null> {
+    const query = encodeURIComponent(direccion);
+    const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon),
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error geocodificando dirección:', error);
+      return null;
+    }
+  }
+
+  async crearOferta() {
+    this.direccionInvalida = false;
+
+    const coords = await this.convertirDireccionACoordenadas(
+      this.direccionTexto
+    );
+
+    if (!coords) {
+      this.direccionInvalida = true;
+      return;
+    }
+
+    const oferta: Oferta = {
+      titulo: this.titulo,
+      descripcion: this.descripcion,
+      empresaId: this.userService.uid,
+      inicio: this.inicio,
+      salario: this.salario,
+      tipoContrato: this.tipoContrato,
+      logo: this.logoUrl,
+      ubicacion: coords,
+      creadaEn: '',
+    };
+
+    try {
+      await this.jobService.crearOferta(oferta);
+      alert('✅ Oferta publicada correctamente.');
+      await this.loadJobs(); // ← 🔄 recarga desde Firebase
+      this.resetFormulario();
+    } catch (error) {
+      console.error('❌ Error al publicar la oferta:', error);
+      alert('Error al guardar la oferta.');
+    }
+  }
+
+  resetFormulario() {
+    this.titulo = '';
+    this.descripcion = '';
+    this.salario = 0;
+    this.tipoContrato = '';
+    this.logoUrl = '';
+    this.inicio = '';
+    this.direccionTexto = '';
+    this.direccionInvalida = false;
+    this.mostrarPopup = false;
+  }
+
+  async loadJobs() {
+    const snapshot = await this.jobService.getOfertas();
+    this.jobs = snapshot;
+
+    if (this.map) {
+      this.marcadores.forEach((m) => this.map.removeLayer(m));
+      this.marcadores = [];
+
+      this.jobs.forEach((job) => {
+        if (job.ubicacion?.lat && job.ubicacion?.lng) {
+          const marker = L.marker([job.ubicacion.lat, job.ubicacion.lng], {
+            icon: L.icon({
+              iconUrl: job.logo,
+              iconSize: [30, 30],
+              iconAnchor: [15, 30],
+              popupAnchor: [0, -30],
+              className: 'custom-marker',
+            }),
+          });
+
+          marker
+            .addTo(this.map)
+            .bindPopup(`<strong>${job.titulo}</strong><br>${job.descripcion}`);
+
+          this.marcadores.push(marker);
+        }
+      });
+    }
   }
 
   async ngAfterViewInit(): Promise<void> {
@@ -65,7 +151,7 @@ export class HomeComponent implements AfterViewInit {
 
     const L = await import('leaflet');
     const { lat, lng } = this.userService.location;
-    const map = L.map('map').setView([lat, lng], 13);
+    this.map = L.map('map').setView([lat, lng], 13);
 
     L.tileLayer(
       'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
@@ -74,41 +160,23 @@ export class HomeComponent implements AfterViewInit {
         subdomains: 'abcd',
         maxZoom: 19,
       }
-    ).addTo(map);
-
-    this.jobs.forEach((job) => {
-      if (job.lat && job.lng) {
-        const icon = L.icon({
-          iconUrl: job.logo,
-          iconSize: [30, 30], // tamaño del icono
-          iconAnchor: [20, 40], // punto "base" del icono (abajo centro)
-          popupAnchor: [0, -40], // posición del popup con respecto al icono
-          className: 'custom-marker',
-        });
-
-        L.marker([job.lat, job.lng], { icon })
-          .addTo(map)
-          .bindPopup(`<strong>${job.empresa}</strong><br>${job.puesto}`);
-      }
-    });
+    ).addTo(this.map);
   }
 
   abrirFormularioOferta() {
-    console.log('Abrir modal para nueva oferta');
-    // Más adelante puedes redirigir o abrir un modal
+    this.mostrarPopup = true;
   }
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
 
-    if (tab === 'profile')
-    {
+    if (tab === 'profile') {
       this.router.navigate(['/profile-settings']);
     }
   }
 
   ngOnInit(): void {
-    //this.loadJobs();
+    this.loadJobs();
   }
 
   get isEmpresa() {
@@ -122,10 +190,4 @@ export class HomeComponent implements AfterViewInit {
   logout() {
     this.authService.logout();
   }
-
-  /**private loadJobs() {
-    this.jobService.getJobs().subscribe((data) => {
-      this.jobs = data;
-    });
-  }**/
 }

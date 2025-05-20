@@ -35,9 +35,11 @@ export const routes: Routes = [
   {
     path: 'profile-settings',
     loadComponent: () =>
-      import('./pages/profile-settings/profile-settings.component').then(m => m.ProfileSettingsComponent),
-    canActivate: [authGuard]
-  },  
+      import('./pages/profile-settings/profile-settings.component').then(
+        (m) => m.ProfileSettingsComponent
+      ),
+    canActivate: [authGuard],
+  },
   {
     path: 'register-step1',
     loadComponent: () =>
@@ -71,10 +73,16 @@ export const routes: Routes = [
     canActivate: [registrationFlowGuard],
   },
   {
+    path: 'crear-oferta',
+    loadComponent: () =>
+      import('./pages/crear-oferta/crear-oferta.component').then(
+        (m) => m.CrearOfertaComponent
+      ),
+    canActivate: [authGuard], // y puedes añadir roleGuard si quieres limitar a empresas
+  },
+  {
     path: '**',
     loadComponent: () =>
-      import('./pages/not-found/not-found.component').then(
-        (m) => m.NotFoundComponent
-      ),
+      import('./pages/login/login.component').then((m) => m.LoginComponent),
   },
 ];

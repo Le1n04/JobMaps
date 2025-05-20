@@ -14,7 +14,7 @@ import { UserService } from '../../../services/user.service';
 export class SelectLocationComponent implements AfterViewInit {
   private map!: L.Map;
   private marker!: L.Marker;
-  from: 'profile' | 'register' = 'register';
+  from: 'profile' | 'register' | 'crear-oferta' = 'register';
 
   constructor(
     private route: ActivatedRoute,
@@ -25,8 +25,9 @@ export class SelectLocationComponent implements AfterViewInit {
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
-      if (params['from'] === 'profile') {
-        this.from = 'profile';
+      const origen = params['from'];
+      if (origen === 'profile' || origen === 'crear-oferta') {
+        this.from = origen;
       }
     });
   }
@@ -40,7 +41,6 @@ export class SelectLocationComponent implements AfterViewInit {
     });
 
     const fallbackCoords: L.LatLngExpression = [36.7213, -4.4214];
-
     this.map = L.map('manual-map');
 
     L.tileLayer(
@@ -78,11 +78,23 @@ export class SelectLocationComponent implements AfterViewInit {
 
   confirmarUbicacion() {
     const coords = this.marker.getLatLng();
-    this.userService.setLocation(coords.lat, coords.lng);
 
-    if (this.from === 'profile') {
+    // Guardar ubicación en localStorage (temporal)
+    localStorage.setItem(
+      'ubicacionOferta',
+      JSON.stringify({
+        lat: coords.lat,
+        lng: coords.lng,
+      })
+    );
+
+    if (this.from === 'crear-oferta') {
+      this.router.navigate(['/home']);
+    } else if (this.from === 'profile') {
+      this.userService.setLocation(coords.lat, coords.lng);
       this.router.navigate(['/profile-settings']);
     } else {
+      this.userService.setLocation(coords.lat, coords.lng);
       this.router.navigate(['/register-password']);
     }
   }

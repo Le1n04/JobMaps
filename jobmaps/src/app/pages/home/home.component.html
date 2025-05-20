@@ -6,14 +6,13 @@
     <div class="job-card" *ngFor="let job of jobs">
       <img [src]="job.logo" alt="Logo empresa" />
       <div class="info">
-        <h3>{{ job.empresa }}</h3>
-        <p>{{ job.puesto }}</p>
+        <h3>{{ job.titulo }}</h3>
+        <p>{{ job.descripcion }}</p>
         <div class="meta">
-          <span>{{ job.fecha | date : "d MMMM y" }}</span>
-          <span>{{ job.distancia }} km</span>
+          <span>{{ job.inicio | date : "d MMMM y" }}</span>
+          <span>{{ job.salario }} €</span>
         </div>
       </div>
-      <div class="salario">{{ job.salario }} €</div>
     </div>
   </div>
 
@@ -75,4 +74,91 @@
   >
     +
   </button>
+  <div class="popup-overlay" *ngIf="mostrarPopup">
+    <div class="popup">
+      <h3>Nueva oferta</h3>
+      <form (ngSubmit)="crearOferta()" #form="ngForm">
+        <div class="form-field">
+          <label for="titulo">Nombre de la empresa</label>
+          <input id="titulo" name="titulo" [(ngModel)]="titulo" required />
+        </div>
+
+        <div class="form-field">
+          <label for="descripcion">Puesto ofrecido</label>
+          <input
+            id="descripcion"
+            name="descripcion"
+            [(ngModel)]="descripcion"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="inicio">Fecha de inicio</label>
+          <input
+            id="inicio"
+            type="date"
+            name="inicio"
+            [(ngModel)]="inicio"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="salario">Salario mensual (€)</label>
+          <input
+            id="salario"
+            type="number"
+            name="salario"
+            [(ngModel)]="salario"
+            min="0"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="tipoContrato">Tipo de contrato</label>
+          <select
+            id="tipoContrato"
+            name="tipoContrato"
+            [(ngModel)]="tipoContrato"
+            required
+          >
+            <option value="" disabled selected>Selecciona una opción</option>
+            <option value="Jornada completa">Jornada completa</option>
+            <option value="Parcial">Parcial</option>
+            <option value="Temporal">Temporal</option>
+            <option value="Prácticas">Prácticas</option>
+            <option value="Autónomo">Autónomo</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="logoUrl">URL del logo</label>
+          <input id="logoUrl" name="logoUrl" [(ngModel)]="logoUrl" required />
+        </div>
+
+        <div class="form-field">
+          <label for="direccion">Dirección del lugar de trabajo</label>
+          <input
+            id="direccion"
+            type="text"
+            name="direccion"
+            [(ngModel)]="direccionTexto"
+            placeholder="Ej: Avenida Isabel Manoja, Torremolinos"
+            required
+          />
+        </div>
+
+        <div *ngIf="direccionInvalida" class="error-text">
+          ❌ No se ha podido encontrar la dirección introducida.
+        </div>
+
+        <div class="popup-buttons">
+          <button type="submit" [disabled]="form.invalid">Publicar</button>
+          <button type="button" (click)="mostrarPopup = false">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

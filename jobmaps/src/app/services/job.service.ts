@@ -1,27 +1,50 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+  getDocs,
+} from 'firebase/firestore';
 
-export interface Job {
-  lng: number;
-  lat: number;
-  empresa: string;
-  puesto: string;
-  distancia: number;
+export interface Oferta {
+  titulo: string;
+  descripcion: string;
+  empresaId: string;
+  creadaEn: any;
+  inicio: string; // ISO date string (ej: '2025-06-01')
   salario: number;
-  fecha: string;
+  tipoContrato: string;
   logo: string;
+  ubicacion: {
+    lat: number;
+    lng: number;
+  };
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class JobService {
-  private apiUrl = 'https://TU_BACKEND_URL/api/jobs'; // <- cambiar cuando tengas backend
+  private db = getFirestore();
 
-  constructor(private http: HttpClient) {}
+  constructor() {}
 
-  getJobs(): Observable<Job[]> {
-    return this.http.get<Job[]>(this.apiUrl);
+  async getOfertas(): Promise<Oferta[]> {
+    const ofertasRef = collection(this.db, 'ofertas');
+    const snapshot = await getDocs(ofertasRef);
+
+    return snapshot.docs.map((doc) => ({
+      ...(doc.data() as Oferta),
+      creadaEn: doc.data()['creadaEn']?.toDate?.() || new Date(),
+    }));
+  }
+
+  async crearOferta(oferta: Oferta) {
+    const ofertasRef = collection(this.db, 'ofertas');
+    return await addDoc(ofertasRef, {
+      ...oferta,
+      creadaEn: serverTimestamp(),
+    });
   }
 }

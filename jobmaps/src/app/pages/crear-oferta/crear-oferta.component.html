@@ -1,0 +1,27 @@
+<div class="crear-oferta-container">
+  <h2>Publicar nueva oferta</h2>
+
+  <form (ngSubmit)="publicarOferta()" #form="ngForm">
+    <label for="titulo">Título</label>
+    <input
+      id="titulo"
+      name="titulo"
+      type="text"
+      [(ngModel)]="titulo"
+      required
+    />
+
+    <label for="descripcion">Descripción</label>
+    <textarea
+      id="descripcion"
+      name="descripcion"
+      [(ngModel)]="descripcion"
+      rows="6"
+      required
+    ></textarea>
+
+    <button type="submit" [disabled]="form.invalid">
+      Publicar
+    </button>
+  </form>
+</div>
