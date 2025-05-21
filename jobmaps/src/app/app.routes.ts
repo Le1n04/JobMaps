@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { noAuthGuard } from './guards/no-auth.guard';
 import { registrationFlowGuard } from './guards/registration-flow.guard';
+import { empresaOnlyGuard } from './guards/empresa-only.guard';
 
 export const routes: Routes = [
   {

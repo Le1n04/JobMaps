@@ -7,13 +7,21 @@ import { Router } from '@angular/router';
 import { JobService, Oferta } from '../../services/job.service';
 import { FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
+import { OfertaDetalleComponent } from '../../components/oferta-detalle/oferta-detalle.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
-  imports: [MatIconModule, NgIf, NgFor, CommonModule, FormsModule],
+  imports: [
+    MatIconModule,
+    NgIf,
+    NgFor,
+    CommonModule,
+    FormsModule,
+    OfertaDetalleComponent,
+  ],
 })
 export class HomeComponent implements AfterViewInit {
   view: 'map' | 'list' = 'map';
@@ -26,7 +34,7 @@ export class HomeComponent implements AfterViewInit {
   // Campos del formulario
   direccionTexto: string = '';
   direccionInvalida = false;
-
+  selectedOferta: Oferta | null = null;
   titulo: string = '';
   descripcion: string = '';
   salario: number = 0;
@@ -104,6 +112,10 @@ export class HomeComponent implements AfterViewInit {
     }
   }
 
+  cerrarModalOferta() {
+    this.selectedOferta = null;
+  }
+
   resetFormulario() {
     this.titulo = '';
     this.descripcion = '';
@@ -136,9 +148,9 @@ export class HomeComponent implements AfterViewInit {
             }),
           });
 
-          marker
-            .addTo(this.map)
-            .bindPopup(`<strong>${job.titulo}</strong><br>${job.descripcion}`);
+          marker.addTo(this.map).on('click', () => {
+            this.selectedOferta = job;
+          });
 
           this.marcadores.push(marker);
         }

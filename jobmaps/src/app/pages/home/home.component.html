@@ -161,4 +161,15 @@
       </form>
     </div>
   </div>
+
+  <app-oferta-detalle
+    *ngIf="selectedOferta"
+    [titulo]="selectedOferta.titulo"
+    [descripcion]="selectedOferta.descripcion"
+    [salario]="selectedOferta.salario"
+    [tipoContrato]="selectedOferta.tipoContrato"
+    [inicio]="selectedOferta.inicio"
+    [logo]="selectedOferta.logo"
+    [onCerrar]="cerrarModalOferta"
+  />
 </div>

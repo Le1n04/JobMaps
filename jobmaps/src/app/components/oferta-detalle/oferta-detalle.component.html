@@ -1,0 +1,25 @@
+<div class="modal-overlay">
+  <div class="modal-content">
+    <button class="close-btn" (click)="onCerrar()">×</button>
+
+    <div class="left">
+      <h2>{{ titulo }}</h2>
+      <p class="sub">{{ descripcion }}</p>
+
+      <p><strong>Salario:</strong> {{ salario }} €/mes</p>
+      <p><strong>Tipo de contrato:</strong> {{ tipoContrato }}</p>
+      <p><strong>Fecha de inicio:</strong> {{ inicio }}</p>
+
+      <div class="bottom-buttons">
+        <button class="heart-btn" (click)="toggleFavorito()">
+          <mat-icon>{{ favorito ? "favorite" : "favorite_border" }}</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="right">
+      <img *ngIf="logo" [src]="logo" alt="Logo empresa" />
+      <button class="apply-btn">Aplicar</button>
+    </div>
+  </div>
+</div>
