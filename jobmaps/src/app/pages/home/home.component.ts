@@ -32,14 +32,14 @@ export class HomeComponent implements AfterViewInit {
   marcadores: any[] = [];
   direccionTexto: string = '';
   direccionInvalida = false;
-  selectedOferta: Oferta | null = null;
+  selectedOferta: (Oferta & { id: string }) | null = null;
   titulo: string = '';
   descripcion: string = '';
   salario: number = 0;
   tipoContrato: string = '';
   inicio: string = '';
   logoUrl: string = '';
-  jobs: Oferta[] = [];
+  jobs: (Oferta & { id: string })[] = [];
 
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
@@ -102,7 +102,7 @@ export class HomeComponent implements AfterViewInit {
     try {
       await this.jobService.crearOferta(oferta);
       alert('✅ Oferta publicada correctamente.');
-      await this.loadJobs(); // ← 🔄 recarga desde Firebase
+      await this.loadJobs();
       this.resetFormulario();
     } catch (error) {
       console.error('❌ Error al publicar la oferta:', error);
@@ -111,9 +111,8 @@ export class HomeComponent implements AfterViewInit {
   }
 
   cerrarModalOferta = () => {
-    console.log('cerrarModalOferta: ' + this.selectedOferta);
     this.selectedOferta = null;
-  }
+  };
 
   resetFormulario() {
     this.titulo = '';
@@ -129,7 +128,10 @@ export class HomeComponent implements AfterViewInit {
 
   async loadJobs() {
     const snapshot = await this.jobService.getOfertas();
-    this.jobs = snapshot;
+    this.jobs = snapshot.map((doc: any) => ({
+      ...doc,
+      id: doc.id
+    }));
 
     if (this.map) {
       this.marcadores.forEach((m) => this.map.removeLayer(m));

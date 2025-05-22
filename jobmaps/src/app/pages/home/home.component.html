@@ -151,7 +151,7 @@
         </div>
 
         <div *ngIf="direccionInvalida" class="error-text">
-          ❌ No se ha podido encontrar la dirección introducida.
+          Error: No se ha podido encontrar la dirección introducida.
         </div>
 
         <div class="popup-buttons">
@@ -171,5 +171,6 @@
   [tipoContrato]="selectedOferta.tipoContrato"
   [inicio]="selectedOferta.inicio"
   [logo]="selectedOferta.logo"
+  [idOferta]="selectedOferta.id"
   [onCerrar]="cerrarModalOferta"
 />

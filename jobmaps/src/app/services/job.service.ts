@@ -22,6 +22,9 @@ export interface Oferta {
   };
 }
 
+// 🆕 Tipo extendido con ID
+export type OfertaConId = Oferta & { id: string };
+
 @Injectable({
   providedIn: 'root',
 })
@@ -30,12 +33,13 @@ export class JobService {
 
   constructor() {}
 
-  async getOfertas(): Promise<Oferta[]> {
+  async getOfertas(): Promise<OfertaConId[]> {
     const ofertasRef = collection(this.db, 'ofertas');
     const snapshot = await getDocs(ofertasRef);
 
     return snapshot.docs.map((doc) => ({
       ...(doc.data() as Oferta),
+      id: doc.id, // 🆕 ID del documento
       creadaEn: doc.data()['creadaEn']?.toDate?.() || new Date(),
     }));
   }
