@@ -30,8 +30,6 @@ export class HomeComponent implements AfterViewInit {
   mostrarPopup = false;
   map!: any;
   marcadores: any[] = [];
-
-  // Campos del formulario
   direccionTexto: string = '';
   direccionInvalida = false;
   selectedOferta: Oferta | null = null;
@@ -112,7 +110,8 @@ export class HomeComponent implements AfterViewInit {
     }
   }
 
-  cerrarModalOferta() {
+  cerrarModalOferta = () => {
+    console.log('cerrarModalOferta: ' + this.selectedOferta);
     this.selectedOferta = null;
   }
 
