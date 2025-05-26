@@ -8,6 +8,7 @@ import { JobService, Oferta } from '../../services/job.service';
 import { FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
 import { OfertaDetalleComponent } from '../../components/oferta-detalle/oferta-detalle.component';
+import { SnackbarService } from '../../services/snackbar.service';
 
 @Component({
   selector: 'app-home',
@@ -45,6 +46,7 @@ export class HomeComponent implements AfterViewInit {
     @Inject(PLATFORM_ID) platformId: Object,
     private jobService: JobService,
     private authService: AuthService,
+    private snackbar: SnackbarService,
     private userService: UserService,
     private router: Router
   ) {
@@ -101,12 +103,12 @@ export class HomeComponent implements AfterViewInit {
 
     try {
       await this.jobService.crearOferta(oferta);
-      alert('✅ Oferta publicada correctamente.');
+      this.snackbar.mostrar('Oferta publicada correctamente.', 'ok');
       await this.loadJobs();
       this.resetFormulario();
     } catch (error) {
-      console.error('❌ Error al publicar la oferta:', error);
-      alert('Error al guardar la oferta.');
+      console.error('Error al publicar la oferta:', error);
+      this.snackbar.mostrar('Error al guardar la oferta.', 'error');
     }
   }
 
@@ -130,7 +132,7 @@ export class HomeComponent implements AfterViewInit {
     const snapshot = await this.jobService.getOfertas();
     this.jobs = snapshot.map((doc: any) => ({
       ...doc,
-      id: doc.id
+      id: doc.id,
     }));
 
     if (this.map) {
@@ -162,8 +164,11 @@ export class HomeComponent implements AfterViewInit {
   async ngAfterViewInit(): Promise<void> {
     if (!this.isBrowser) return;
 
+    await this.userService.usuarioCargado; // ⏳ Esperar a que se cargue el usuario
+
     const L = await import('leaflet');
     const { lat, lng } = this.userService.location;
+
     this.map = L.map('map').setView([lat, lng], 13);
 
     L.tileLayer(
@@ -186,9 +191,13 @@ export class HomeComponent implements AfterViewInit {
     if (tab === 'profile') {
       this.router.navigate(['/profile-settings']);
     }
+    if (tab === 'favourites') {
+      this.router.navigate(['/favoritos']);
+    }
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.userService.usuarioCargado;
     this.loadJobs();
   }
 

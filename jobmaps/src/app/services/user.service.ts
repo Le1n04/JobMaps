@@ -24,12 +24,18 @@ export class UserService {
       lat: number;
       lng: number;
     };
+    cvUrl?: string;
   } = {};
 
   private _uid: string = '';
   private userData$ = new BehaviorSubject(this._userData);
+  usuarioCargado!: Promise<void>;
+  private resolveUsuarioCargado!: () => void;
 
   constructor() {
+    this.usuarioCargado = new Promise((resolve) => {
+      this.resolveUsuarioCargado = resolve;
+    });
     this.loadUserFromFirebase();
   }
 
@@ -51,6 +57,7 @@ export class UserService {
         if (docSnap.exists()) {
           const data = docSnap.data();
           this._userData.age = data['age'] ?? 0;
+          this._userData['cvUrl'] = data['cvUrl'] ?? '';
           this._userData.country = data['country'] ?? '';
           this._userData.role = data['role'] ?? 'desempleado';
           this._userData.location = data['location'] ?? {
@@ -64,8 +71,15 @@ export class UserService {
       } else {
         console.warn('No user logged in');
       }
+      this.resolveUsuarioCargado();
     });
+    
   }
+
+  get cvUrl(): string {
+    return (this._userData as any).cvUrl ?? '';
+  }
+
 
   // 🔁 Observable (opcional)
   get userDataObservable() {

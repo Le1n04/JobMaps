@@ -18,6 +18,14 @@ export const routes: Routes = [
     canActivate: [noAuthGuard],
   },
   {
+    path: 'favoritos',
+    loadComponent: () =>
+      import('./pages/favoritos-page/favoritos-page.component').then(
+        (m) => m.FavoritosPageComponent
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: 'email-login',
     loadComponent: () =>
       import('./pages/email-login/email-login.component').then(

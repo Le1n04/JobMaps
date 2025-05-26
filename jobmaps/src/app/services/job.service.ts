@@ -12,7 +12,7 @@ export interface Oferta {
   descripcion: string;
   empresaId: string;
   creadaEn: any;
-  inicio: string; // ISO date string (ej: '2025-06-01')
+  inicio: string;
   salario: number;
   tipoContrato: string;
   logo: string;

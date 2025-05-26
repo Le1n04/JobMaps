@@ -6,9 +6,9 @@
       <h2>{{ titulo }}</h2>
       <p class="sub">{{ descripcion }}</p>
 
-      <p><strong>Salario:</strong> {{ salario }} €/mes</p>
-      <p><strong>Tipo de contrato:</strong> {{ tipoContrato }}</p>
-      <p><strong>Fecha de inicio:</strong> {{ inicio }}</p>
+      <p><strong>Salary:</strong> {{ salario }} €/mes</p>
+      <p><strong>Contract type:</strong> {{ tipoContrato }}</p>
+      <p><strong>Starting date:</strong> {{ inicio }}</p>
 
       <div class="bottom-buttons">
         <button class="heart-btn" (click)="toggleFavorito()">
@@ -19,7 +19,13 @@
 
     <div class="right">
       <img *ngIf="logo" [src]="logo" alt="Logo empresa" />
-      <button class="apply-btn">Aplicar</button>
+      <button
+        class="apply-btn"
+        (click)="aplicar()"
+        [disabled]="yaAplicado || aplicando"
+      >
+        {{ yaAplicado ? "You have applied" : "Apply" }}
+      </button>
     </div>
   </div>
 </div>

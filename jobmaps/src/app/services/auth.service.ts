@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { UserService } from './user.service';
+import { SnackbarService } from './snackbar.service';
 import {
   Auth,
   signInWithPopup,
@@ -21,6 +22,7 @@ export class AuthService {
   constructor(
     private auth: Auth,
     private router: Router,
+    private snackbar: SnackbarService,
     private userService: UserService
   ) {
     onAuthStateChanged(this.auth, (user) => {
@@ -86,7 +88,7 @@ export class AuthService {
       this.router.navigate(['/home']);
     } catch (error) {
       console.error('Error registrando usuario:', error);
-      alert('No se pudo crear el usuario');
+      this.snackbar.mostrar('No se pudo crear el usuario');
     }
   }
 

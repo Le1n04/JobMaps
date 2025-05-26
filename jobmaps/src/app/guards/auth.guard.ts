@@ -1,7 +1,6 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
-import { UserService } from '../services/user.service';
 
 export const authGuard: CanActivateFn = async () => {
   const auth = inject(Auth);

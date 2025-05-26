@@ -49,10 +49,10 @@ export class RegisterPasswordComponent {
 
       await this.userService.createUserDocument(uid, userData);
 
-      console.log('✅ Usuario creado y documento guardado en Firestore');
+      console.log('Usuario creado y documento guardado en Firestore');
       this.router.navigate(['/home']);
     } catch (error: any) {
-      console.error('❌ Error al crear el usuario:', error);
+      console.error('Error al crear el usuario:', error);
       this.error = error.message;
     }
   }

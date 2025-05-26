@@ -1,8 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { FavoritosService } from '../../services/favoritos.service';
+import { AplicacionesService } from '../../services/aplicaciones.service';
+import { SnackbarService } from '../../services/snackbar.service';
+import { getAuth } from '@angular/fire/auth';
+import { getDownloadURL, getStorage, ref } from 'firebase/storage';
 
 @Component({
   selector: 'app-oferta-detalle',
@@ -20,15 +25,67 @@ export class OfertaDetalleComponent implements OnInit {
   @Input() logo = '';
   @Input() idOferta = ''; // 🆕 ID de la oferta
   @Input() onCerrar: () => void = () => {};
+  @Output() onEliminarFavorito = new EventEmitter<string>();
 
   favorito: boolean = false;
+  yaAplicado: boolean = false;
+  aplicando: boolean = false;
 
-  constructor(private favoritosService: FavoritosService) {}
+  constructor(
+    private favoritosService: FavoritosService,
+    private aplicacionesService: AplicacionesService,
+    private snackbar: MatSnackBar
+  ) {}
 
   async ngOnInit(): Promise<void> {
     if (this.idOferta) {
       this.favorito = await this.favoritosService.isFavorito(this.idOferta);
+      this.yaAplicado = await this.aplicacionesService.yaHaAplicado(
+        this.idOferta
+      );
     }
+  }
+
+  async aplicar() {
+    if (this.yaAplicado || this.aplicando) return;
+
+    this.aplicando = true;
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const storage = getStorage();
+
+    if (!user) {
+      this.snackbar.open('Debes estar logueado para aplicar.', 'Cerrar', {
+        duration: 3000,
+      });
+      this.aplicando = false;
+      return;
+    }
+
+    const cvPath = `cvs/${user.uid}/cv.pdf`;
+    const fileRef = ref(storage, cvPath);
+
+    try {
+      // ✅ Comprobar si el CV existe
+      await getDownloadURL(fileRef);
+
+      // ✅ Registrar la aplicación en Firestore
+      await this.aplicacionesService.aplicarAOferta(this.idOferta);
+
+      this.snackbar.open('Has aplicado correctamente a la oferta.', 'Cerrar', {
+        duration: 3000,
+        panelClass: ['snackbar-success'],
+      });
+      this.yaAplicado = true;
+    } catch (error: any) {
+      console.error('Error al aplicar:', error);
+      const msg = error?.message?.includes('storage')
+        ? 'Debes subir tu CV en el perfil antes de aplicar a una oferta.'
+        : 'Ocurrió un error al aplicar.';
+      this.snackbar.open(msg, 'Cerrar', { duration: 4000 });
+    }
+
+    this.aplicando = false;
   }
 
   toggleFavorito() {
@@ -38,6 +95,7 @@ export class OfertaDetalleComponent implements OnInit {
       this.favoritosService.addFavorito(this.idOferta);
     } else {
       this.favoritosService.removeFavorito(this.idOferta);
+      this.onEliminarFavorito.emit(this.idOferta);
     }
   }
 }

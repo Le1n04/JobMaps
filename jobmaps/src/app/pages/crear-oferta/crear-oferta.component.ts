@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { UserService } from '../../services/user.service';
+import { SnackbarService } from '../../services/snackbar.service';
 
 @Component({
   selector: 'app-crear-oferta',
@@ -18,7 +19,8 @@ export class CrearOfertaComponent {
 
   constructor(
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private snackbar: SnackbarService
   ) {}
 
   async publicarOferta() {
@@ -35,11 +37,11 @@ export class CrearOfertaComponent {
 
     try {
       await addDoc(ofertasRef, nuevaOferta);
-      alert('✅ Oferta publicada correctamente.');
+      this.snackbar.mostrar('Oferta publicada correctamente.', 'ok');
       this.router.navigate(['/home']);
     } catch (error) {
-      console.error('❌ Error al publicar oferta:', error);
-      alert('Ocurrió un error al guardar la oferta.');
+      console.error('Error al publicar oferta:', error);
+      this.snackbar.mostrar('Ocurrió un error al guardar la oferta.', 'error');
     }
   }
 }

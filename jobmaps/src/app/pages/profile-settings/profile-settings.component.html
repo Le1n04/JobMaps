@@ -2,13 +2,13 @@
   <!-- Header -->
   <div class="header">
     <button class="back-btn" (click)="goBack()">←</button>
-    <div class="title">Perfil</div>
-    <button class="logout-btn" (click)="logout()">Cerrar sesión</button>
+    <div class="title">Profile</div>
+    <button class="logout-btn" (click)="logout()">Logout</button>
   </div>
 
   <!-- Formulario de datos personales -->
   <form (ngSubmit)="guardarCambios()" #form="ngForm">
-    <label for="fullName">Nombre completo</label>
+    <label for="fullName">Full name</label>
     <input
       id="fullName"
       type="text"
@@ -17,7 +17,7 @@
       required
     />
 
-    <label for="age">Edad</label>
+    <label for="age">Age</label>
     <input
       id="age"
       type="number"
@@ -27,24 +27,38 @@
       min="1"
     />
 
-    <label for="country">País</label>
+    <label for="country">Country</label>
     <select id="country" [(ngModel)]="country" name="country" required>
-      <option value="" disabled selected>Selecciona tu país</option>
-      <option value="Spain">España</option>
-      <option value="France">Francia</option>
-      <option value="Germany">Alemania</option>
-      <option value="Other">Otro</option>
+      <option value="" disabled selected>Choose your country</option>
+      <option value="Spain">Spain</option>
+      <option value="France">France</option>
+      <option value="Germany">Germany</option>
+      <option value="Other">Other</option>
     </select>
 
-    <label for="role">Tipo de usuario</label>
+    <label for="role">User type</label>
     <select id="role" [(ngModel)]="role" name="role" required>
-      <option value="empresa">Empresa</option>
-      <option value="desempleado">Desempleado</option>
+      <option value="empresa">Company</option>
+      <option value="desempleado">Job Seeker</option>
     </select>
+
+    <label for="cvFile">Upload CV</label>
+    <input
+      id="cvFile"
+      type="file"
+      (change)="onCVSelected($event)"
+      accept="application/pdf"
+    />
+
+    <div *ngIf="cvUrl" class="cv-link">
+      <a class="cv-link" href="{{ cvUrl }}" target="_blank">
+        <mat-icon>picture_as_pdf</mat-icon> Ver CV actual
+      </a>
+    </div>
 
     <!-- Ubicación -->
     <div class="location-row">
-      <label>Ubicación</label>
+      <label>Location</label>
       <span class="location">
         {{ ubicacionLegible }}
       </span>
@@ -53,12 +67,12 @@
         class="edit-location-btn"
         (click)="cambiarUbicacion()"
       >
-        Cambiar
+        Change
       </button>
     </div>
 
     <button type="submit" class="save-btn" [disabled]="form.invalid">
-      Guardar cambios
+      Save
     </button>
   </form>
 </div>

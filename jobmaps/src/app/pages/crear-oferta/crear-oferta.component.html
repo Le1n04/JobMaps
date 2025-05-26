@@ -1,8 +1,8 @@
 <div class="crear-oferta-container">
-  <h2>Publicar nueva oferta</h2>
+  <h2>Post new job offer</h2>
 
   <form (ngSubmit)="publicarOferta()" #form="ngForm">
-    <label for="titulo">Título</label>
+    <label for="titulo">Title</label>
     <input
       id="titulo"
       name="titulo"
@@ -11,7 +11,7 @@
       required
     />
 
-    <label for="descripcion">Descripción</label>
+    <label for="descripcion">Description</label>
     <textarea
       id="descripcion"
       name="descripcion"
@@ -21,7 +21,7 @@
     ></textarea>
 
     <button type="submit" [disabled]="form.invalid">
-      Publicar
+      Publish
     </button>
   </form>
 </div>

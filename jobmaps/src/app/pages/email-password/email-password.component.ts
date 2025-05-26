@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 import { UserService } from '../../services/user.service';
+import { SnackbarService } from '../../services/snackbar.service';
 
 @Component({
   standalone: true,
@@ -19,7 +20,8 @@ export class EmailPasswordComponent {
     private router: Router,
     private auth: Auth,
     private userService: UserService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private snackbar: SnackbarService
   ) {
     this.route.queryParams.subscribe(params => {
       const email = params['email'];
@@ -42,11 +44,11 @@ export class EmailPasswordComponent {
     } catch (error: any) {
       console.error('Error al iniciar sesión:', error);
       if (error.code === 'auth/wrong-password') {
-        alert('Contraseña incorrecta.');
+        this.snackbar.mostrar('Contraseña incorrecta.', 'error');
       } else if (error.code === 'auth/user-not-found') {
-        alert('El usuario no existe.');
+        this.snackbar.mostrar('El usuario no existe.', 'error');
       } else {
-        alert('Error al iniciar sesión. Inténtalo más tarde.');
+        this.snackbar.mostrar('Error al iniciar sesión. Inténtalo más tarde.', 'error');
       }
     }
   }

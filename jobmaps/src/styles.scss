@@ -1,12 +1,30 @@
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    box-sizing: border-box;
-  }
-  * {
-    box-sizing: inherit;
-    font-family: 'Korolev', sans-serif;
-  }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+* {
+  box-sizing: inherit;
+  font-family: "Korolev", sans-serif;
+}
+
+.snackbar-ok {
+  background-color: #00796b;
+  color: white;
+}
+
+.snackbar-error {
+  background-color: #d32f2f;
+  color: white;
+}
+
+.mat-mdc-snack-bar-container {
+  background-color: #00796b !important; /* fondo oscuro o el que quieras */
+  color: white !important;
+  font-weight: 500;
+  border-radius: 6px;
+}

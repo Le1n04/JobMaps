@@ -1,0 +1,76 @@
+<div class="favoritos-container">
+  <!-- Header superior -->
+  <div class="header">
+    <button class="back-btn" (click)="goBack()">←</button>
+    <span class="title">Favorites</span>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- Lista de favoritos -->
+  <div class="list-wrapper">
+    <div
+      class="job-card"
+      *ngFor="let oferta of ofertas"
+      (click)="selectedOferta = oferta"
+    >
+      <img [src]="oferta.logo" alt="Logo empresa" />
+      <div class="info">
+        <h3>{{ oferta.titulo }}</h3>
+        <p>{{ oferta.descripcion }}</p>
+        <div class="meta">
+          <span>{{ oferta.inicio | date : "d MMMM y" }}</span>
+          <span>{{ oferta.salario }} €</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="ofertas.length === 0" class="no-favs">
+      <p>You don't have any favorite offerts.</p>
+    </div>
+  </div>
+
+  <!-- Menú inferior -->
+  <div class="overlay bottom-nav">
+    <button
+      [class.active]="activeTab === 'browse'"
+      (click)="setActiveTab('browse')"
+    >
+      <mat-icon>search</mat-icon>
+      <span>Browse</span>
+    </button>
+    <button
+      [class.active]="activeTab === 'favourites'"
+      (click)="setActiveTab('favourites')"
+    >
+      <mat-icon>favorite</mat-icon>
+      <span>Favorites</span>
+    </button>
+    <button
+      [class.active]="activeTab === 'notifications'"
+      (click)="setActiveTab('notifications')"
+    >
+      <mat-icon>notifications</mat-icon>
+      <span>Notifications</span>
+    </button>
+    <button
+      [class.active]="activeTab === 'profile'"
+      (click)="setActiveTab('profile')"
+    >
+      <mat-icon>person</mat-icon>
+      <span>Profile</span>
+    </button>
+  </div>
+
+  <app-oferta-detalle
+    *ngIf="selectedOferta"
+    [titulo]="selectedOferta.titulo"
+    [descripcion]="selectedOferta.descripcion"
+    [salario]="selectedOferta.salario"
+    [tipoContrato]="selectedOferta.tipoContrato"
+    [inicio]="selectedOferta.inicio"
+    [logo]="selectedOferta.logo"
+    [idOferta]="selectedOferta.id"
+    [onCerrar]="cerrarModalOferta"
+    (onEliminarFavorito)="eliminarOfertaDeLista($event)"
+  />
+</div>

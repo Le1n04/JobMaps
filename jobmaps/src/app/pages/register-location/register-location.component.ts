@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
+import { SnackbarService } from '../../services/snackbar.service';
 
 @Component({
   selector: 'app-register-location',
@@ -11,11 +12,11 @@ import { UserService } from '../../services/user.service';
   styleUrls: ['./register-location.component.scss'],
 })
 export class RegisterLocationComponent {
-  constructor(private router: Router, private userService: UserService) {}
+  constructor(private router: Router, private userService: UserService, private snackbar: SnackbarService) {}
 
   useCurrentLocation() {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
+      this.snackbar.mostrar('Geolocation is not supported by your browser', 'error');
       return;
     }
 
@@ -30,7 +31,7 @@ export class RegisterLocationComponent {
       },
       (error) => {
         console.error('Error al obtener la ubicación:', error);
-        alert('Unable to retrieve your location');
+        this.snackbar.mostrar('Unable to retrieve your location', 'error');
       },
       {
         enableHighAccuracy: true,

@@ -1,9 +1,17 @@
 import { Injectable } from '@angular/core';
-import { getFirestore, doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  deleteDoc,
+  getDoc,
+  collection,
+  getDocs
+} from 'firebase/firestore';
 import { getAuth } from '@angular/fire/auth';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FavoritosService {
   private db = getFirestore();
@@ -23,6 +31,12 @@ export class FavoritosService {
   async removeFavorito(ofertaId: string): Promise<void> {
     const ref = doc(this.db, `users/${this.uid}/favoritos/${ofertaId}`);
     await deleteDoc(ref);
+  }
+
+  async getFavoritosIds(): Promise<string[]> {
+    const ref = collection(this.db, `users/${this.uid}/favoritos`);
+    const snap = await getDocs(ref);
+    return snap.docs.map((doc) => doc.id);
   }
 
   async isFavorito(ofertaId: string): Promise<boolean> {
