@@ -9,6 +9,8 @@ import { FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
 import { OfertaDetalleComponent } from '../../components/oferta-detalle/oferta-detalle.component';
 import { SnackbarService } from '../../services/snackbar.service';
+import { NotificacionesEmpresaComponent } from '../notificaciones-empresa/notificaciones-empresa.component';
+import { BottomNavComponent } from "../../components/bottom-nav/bottom-nav.component";
 
 @Component({
   selector: 'app-home',
@@ -22,7 +24,9 @@ import { SnackbarService } from '../../services/snackbar.service';
     CommonModule,
     FormsModule,
     OfertaDetalleComponent,
-  ],
+    NotificacionesEmpresaComponent,
+    BottomNavComponent
+],
 })
 export class HomeComponent implements AfterViewInit {
   view: 'map' | 'list' = 'map';
@@ -191,8 +195,11 @@ export class HomeComponent implements AfterViewInit {
     if (tab === 'profile') {
       this.router.navigate(['/profile-settings']);
     }
-    if (tab === 'favourites') {
+    else if (tab === 'favourites') {
       this.router.navigate(['/favoritos']);
+    }
+    else if (tab === 'notifications') {
+      this.router.navigate(['/notifications']);
     }
   }
 

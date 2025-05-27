@@ -7,11 +7,12 @@ import { UserService } from '../../services/user.service';
 import { SnackbarService } from '../../services/snackbar.service';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { MatIconModule } from '@angular/material/icon';
+import { BottomNavComponent } from '../../components/bottom-nav/bottom-nav.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule, BottomNavComponent],
   templateUrl: './profile-settings.component.html',
   styleUrls: ['./profile-settings.component.scss'],
 })
@@ -44,6 +45,22 @@ export class ProfileSettingsComponent {
         this.ubicacionLegible = nombre;
       }
     );
+  }
+
+  activeTab: string = 'profile';
+
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+
+    if (tab === 'browse') {
+      this.router.navigate(['/home']);
+    } else if (tab === 'favourites') {
+      this.router.navigate(['/favoritos']);
+    } else if (tab === 'notifications') {
+      this.router.navigate(['/notifications']);
+    } else if (tab === 'profile') {
+      this.router.navigate(['/profile-settings']);
+    }
   }
 
   ngOnInit() {

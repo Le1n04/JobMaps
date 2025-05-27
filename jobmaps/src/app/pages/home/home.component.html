@@ -1,8 +1,12 @@
 <div class="map-wrapper">
-  <div id="map"></div>
+  <!-- Mapa -->
+  <div id="map" *ngIf="activeTab !== 'notifications' && view === 'map'"></div>
 
-  <!-- Capa de lista que solo se muestra en modo 'list' -->
-  <div class="list-overlay" *ngIf="view === 'list'">
+  <!-- Lista de ofertas -->
+  <div
+    class="list-overlay"
+    *ngIf="activeTab !== 'notifications' && view === 'list'"
+  >
     <div class="job-card" *ngFor="let job of jobs">
       <img [src]="job.logo" alt="Logo empresa" />
       <div class="info">
@@ -16,8 +20,13 @@
     </div>
   </div>
 
+  <!-- Vista de notificaciones -->
+  <app-notificaciones-empresa
+    *ngIf="activeTab === 'notifications'"
+  ></app-notificaciones-empresa>
+
   <!-- Superposición superior -->
-  <div class="overlay top-overlay">
+  <div class="overlay top-overlay" *ngIf="activeTab !== 'notifications'">
     <div class="search-bar">
       <input type="text" placeholder="Search" />
       <button><mat-icon>settings</mat-icon></button>
@@ -33,46 +42,24 @@
     </div>
   </div>
 
-  <div class="overlay bottom-nav">
-    <button
-      [class.active]="activeTab === 'browse'"
-      (click)="setActiveTab('browse')"
-    >
-      <mat-icon>search</mat-icon>
-      <span>Browse</span>
-    </button>
-    <button
-      [class.active]="activeTab === 'favourites'"
-      (click)="setActiveTab('favourites')"
-    >
-      <mat-icon>favorite</mat-icon>
-      <span>Favorites</span>
-    </button>
-    <button
-      [class.active]="activeTab === 'notifications'"
-      (click)="setActiveTab('notifications')"
-    >
-      <mat-icon>notifications</mat-icon>
-      <span>Notifications</span>
-    </button>
-    <button
-      [class.active]="activeTab === 'profile'"
-      (click)="setActiveTab('profile')"
-    >
-      <mat-icon>person</mat-icon>
-      <span>Profile</span>
-    </button>
-  </div>
+  <!-- Menú inferior -->
+  <!-- Menú inferior como componente -->
+  <app-bottom-nav
+    [activeTab]="activeTab"
+    (tabChange)="setActiveTab($event)"
+  ></app-bottom-nav>
 
   <!-- Botón flotante solo visible para EMPRESA -->
   <button
-    *ngIf="isEmpresa"
+    *ngIf="isEmpresa && activeTab === 'browse'"
     class="fab"
     (click)="abrirFormularioOferta()"
     aria-label="Añadir oferta"
   >
     +
   </button>
+
+  <!-- Popup para nueva oferta -->
   <div class="popup-overlay" *ngIf="mostrarPopup">
     <div class="popup">
       <h3>Nueva oferta</h3>

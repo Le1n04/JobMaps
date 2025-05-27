@@ -1,0 +1,32 @@
+<div class="notificaciones-container">
+  <div class="header">
+    <button class="back-btn" (click)="goBack()">←</button>
+    <h2 class="title">Notifications</h2>
+    <div class="spacer"></div>
+  </div>
+
+  <div *ngIf="notificaciones.length === 0" class="empty-msg">
+    No tienes notificaciones por ahora.
+  </div>
+
+  <div
+    *ngFor="let noti of notificaciones"
+    class="notificacion-card"
+    [class.leida]="noti.leido"
+  >
+    <div class="texto">
+      <p>
+        <strong>{{ noti.candidatoNombre }}</strong> ha aplicado a tu oferta
+        <strong>{{ noti.titulo }}</strong
+        >.
+      </p>
+      <small>{{ noti.timestamp?.toDate() | date : "short" }}</small>
+    </div>
+    <a [href]="'mailto:' + noti.candidatoEmail">Contactar</a>
+  </div>
+
+  <app-bottom-nav
+    [activeTab]="activeTab"
+    (tabChange)="setActiveTab($event)"
+  ></app-bottom-nav>
+</div>

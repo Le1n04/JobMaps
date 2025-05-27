@@ -7,11 +7,12 @@ import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { OfertaDetalleComponent } from '../../components/oferta-detalle/oferta-detalle.component';
+import { BottomNavComponent } from '../../components/bottom-nav/bottom-nav.component';
 
 @Component({
   selector: 'app-favoritos-page',
   standalone: true,
-  imports: [CommonModule, NgIf, NgFor, MatIconModule, OfertaDetalleComponent],
+  imports: [CommonModule, NgIf, NgFor, MatIconModule, OfertaDetalleComponent, BottomNavComponent],
   templateUrl: './favoritos-page.component.html',
   styleUrls: ['./favoritos-page.component.scss'],
 })
