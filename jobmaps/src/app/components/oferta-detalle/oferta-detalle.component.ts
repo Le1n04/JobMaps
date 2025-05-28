@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FavoritosService } from '../../services/favoritos.service';
 import { AplicacionesService } from '../../services/aplicaciones.service';
-import { SnackbarService } from '../../services/snackbar.service';
 import { getAuth } from '@angular/fire/auth';
 import { getDownloadURL, getStorage, ref } from 'firebase/storage';
 
@@ -23,7 +22,8 @@ export class OfertaDetalleComponent implements OnInit {
   @Input() tipoContrato = '';
   @Input() inicio = '';
   @Input() logo = '';
-  @Input() idOferta = ''; // 🆕 ID de la oferta
+  @Input() idOferta = '';
+  @Input() empresaId = ''; // 🆕
   @Input() onCerrar: () => void = () => {};
   @Output() onEliminarFavorito = new EventEmitter<string>();
 
@@ -69,13 +69,18 @@ export class OfertaDetalleComponent implements OnInit {
       // ✅ Comprobar si el CV existe
       await getDownloadURL(fileRef);
 
-      // ✅ Registrar la aplicación en Firestore
-      await this.aplicacionesService.aplicarAOferta(this.idOferta);
+      // ✅ Aplicar a la oferta y enviar notificación
+      await this.aplicacionesService.aplicarAOferta(
+        this.idOferta,
+        this.empresaId,
+        this.titulo
+      );
 
       this.snackbar.open('Has aplicado correctamente a la oferta.', 'Cerrar', {
         duration: 3000,
         panelClass: ['snackbar-success'],
       });
+
       this.yaAplicado = true;
     } catch (error: any) {
       console.error('Error al aplicar:', error);

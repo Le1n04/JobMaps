@@ -5,6 +5,7 @@ import {
   setDoc,
   getDoc,
   serverTimestamp,
+  collection,
 } from 'firebase/firestore';
 import { getAuth } from '@angular/fire/auth';
 import { UserService } from './user.service';
@@ -24,7 +25,7 @@ export class AplicacionesService {
     return user.uid;
   }
 
-  async aplicarAOferta(ofertaId: string): Promise<void> {
+  async aplicarAOferta(ofertaId: string, empresaId: string, titulo: string): Promise<void> {
     await this.userService.usuarioCargado;
 
     const ref = doc(this.db, `ofertas/${ofertaId}/aplicaciones/${this.uid}`);
@@ -37,10 +38,33 @@ export class AplicacionesService {
     const nombre = this.userService.fullName;
     const email = this.userService.email;
 
+    // Guardar aplicación
     await setDoc(ref, {
       nombre,
       email,
       fecha: serverTimestamp(),
+    });
+
+    // Crear notificación para la empresa
+    await this.crearNotificacion(empresaId, ofertaId, nombre, email, titulo);
+  }
+
+  async crearNotificacion(
+    empresaId: string,
+    ofertaId: string,
+    candidatoNombre: string,
+    candidatoEmail: string,
+    titulo: string
+  ): Promise<void> {
+    const notiRef = doc(collection(this.db, `users/${empresaId}/notificaciones`));
+
+    await setDoc(notiRef, {
+      candidatoNombre,
+      candidatoEmail,
+      ofertaId,
+      titulo,
+      leido: false,
+      timestamp: serverTimestamp(),
     });
   }
 
