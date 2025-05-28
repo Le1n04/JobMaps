@@ -16,13 +16,25 @@
   >
     <div class="texto">
       <p>
-        <strong>{{ noti.candidatoNombre }}</strong> ha aplicado a tu oferta
-        <strong>{{ noti.titulo }}</strong
-        >.
+        <strong>{{ noti.candidatoNombre }}</strong> has applied for the position at
+        <strong>{{ noti.titulo }}</strong>.
       </p>
-      <small>{{ noti.timestamp?.toDate() | date : "short" }}</small>
+      <small>{{ noti.timestamp?.toDate() | date : 'short' }}</small>
     </div>
-    <a [href]="'mailto:' + noti.candidatoEmail">Contactar</a>
+
+    <div class="acciones">
+      <a
+        class="cv-btn"
+        *ngIf="noti.cvUrl"
+        [href]="noti.cvUrl"
+        target="_blank"
+      >
+        <mat-icon>picture_as_pdf</mat-icon> See CV
+      </a>
+      <a class="contact-btn" [href]="'mailto:' + noti.candidatoEmail">
+        Contact
+      </a>
+    </div>
   </div>
 
   <app-bottom-nav

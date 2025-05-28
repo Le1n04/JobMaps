@@ -1,17 +1,23 @@
 <div class="overlay bottom-nav">
-  <button [class.active]="activeTab === 'browse'" (click)="setTab('browse')">
+  <button [class.active]="activeTab === 'browse'" (click)="setActiveTab('home')">
     <mat-icon>search</mat-icon>
     <span>Browse</span>
   </button>
-  <button [class.active]="activeTab === 'favourites'" (click)="setTab('favourites')">
+
+  <button [class.active]="activeTab === 'favourites'" (click)="setActiveTab('favoritos')">
     <mat-icon>favorite</mat-icon>
     <span>Favorites</span>
   </button>
-  <button [class.active]="activeTab === 'notifications'" (click)="setTab('notifications')">
-    <mat-icon>notifications</mat-icon>
+
+  <button [class.active]="activeTab === 'notifications'" (click)="setActiveTab('notifications')">
+    <mat-icon class="noti-icon">
+      notifications
+      <span *ngIf="tieneNotificacionesSinLeer" class="dot"></span>
+    </mat-icon>
     <span>Notifications</span>
   </button>
-  <button [class.active]="activeTab === 'profile'" (click)="setTab('profile')">
+
+  <button [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile-settings')">
     <mat-icon>person</mat-icon>
     <span>Profile</span>
   </button>

@@ -37,6 +37,7 @@ export class AplicacionesService {
 
     const nombre = this.userService.fullName;
     const email = this.userService.email;
+    const cvUrl = this.userService.cvUrl;
 
     // Guardar aplicación
     await setDoc(ref, {
@@ -45,8 +46,8 @@ export class AplicacionesService {
       fecha: serverTimestamp(),
     });
 
-    // Crear notificación para la empresa
-    await this.crearNotificacion(empresaId, ofertaId, nombre, email, titulo);
+    // Crear notificación para la empresa incluyendo el enlace al CV
+    await this.crearNotificacion(empresaId, ofertaId, nombre, email, titulo, cvUrl);
   }
 
   async crearNotificacion(
@@ -54,7 +55,8 @@ export class AplicacionesService {
     ofertaId: string,
     candidatoNombre: string,
     candidatoEmail: string,
-    titulo: string
+    titulo: string,
+    cvUrl: string
   ): Promise<void> {
     const notiRef = doc(collection(this.db, `users/${empresaId}/notificaciones`));
 
@@ -63,6 +65,7 @@ export class AplicacionesService {
       candidatoEmail,
       ofertaId,
       titulo,
+      cvUrl, // ✅ ahora sí lo guarda
       leido: false,
       timestamp: serverTimestamp(),
     });

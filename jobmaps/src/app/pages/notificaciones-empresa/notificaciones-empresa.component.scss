@@ -114,3 +114,30 @@
     padding-left: 0.75rem;
   }
 }
+
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+
+  .cv-btn, .contact-btn {
+    background-color: #00796b;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+
+    mat-icon {
+      font-size: 18px;
+    }
+
+    &:hover {
+      background-color: #005a4f;
+    }
+  }
+}

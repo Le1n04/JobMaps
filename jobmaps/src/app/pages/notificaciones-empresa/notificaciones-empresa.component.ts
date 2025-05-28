@@ -7,10 +7,24 @@ import {
   getFirestore,
   orderBy,
   query,
+  doc,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { BottomNavComponent } from "../../components/bottom-nav/bottom-nav.component";
+import { BottomNavComponent } from '../../components/bottom-nav/bottom-nav.component';
+import { NotificacionesService } from '../../services/notificaciones.service';
+
+interface Notificacion {
+  id: string;
+  titulo: string;
+  candidatoNombre: string;
+  candidatoEmail: string;
+  leido: boolean;
+  timestamp?: any;
+  cvUrl?: string;
+}
 
 @Component({
   selector: 'app-notificaciones-empresa',
@@ -20,9 +34,14 @@ import { BottomNavComponent } from "../../components/bottom-nav/bottom-nav.compo
   styleUrls: ['./notificaciones-empresa.component.scss'],
 })
 export class NotificacionesEmpresaComponent implements OnInit {
-  notificaciones: any[] = [];
+  notificaciones: Notificacion[] = [];
   db = getFirestore();
-  constructor(private router: Router) {}
+  activeTab: string = 'notifications';
+
+  constructor(
+    private router: Router,
+    private notificacionesService: NotificacionesService
+  ) {}
 
   async ngOnInit() {
     const user = getAuth().currentUser;
@@ -32,10 +51,39 @@ export class NotificacionesEmpresaComponent implements OnInit {
     const q = query(notiRef, orderBy('timestamp', 'desc'));
     const snapshot = await getDocs(q);
 
-    this.notificaciones = snapshot.docs.map((doc) => doc.data());
+    this.notificaciones = snapshot.docs.map((doc) => {
+      const data = doc.data() as Omit<Notificacion, 'id'>;
+      return {
+        id: doc.id,
+        titulo: data.titulo,
+        candidatoNombre: data.candidatoNombre,
+        candidatoEmail: data.candidatoEmail,
+        leido: data.leido,
+        timestamp: data.timestamp,
+        cvUrl: data.cvUrl,
+      };
+    });
+
+    await this.notificacionesService.marcarTodasComoLeidas(user.uid);
   }
 
-  activeTab: string = 'notifications';
+  async marcarComoLeido(noti: any) {
+    const user = getAuth().currentUser;
+    if (!user) return;
+
+    const db = getFirestore();
+    const notiRef = doc(db, `users/${user.uid}/notificaciones/${noti.id}`);
+    await updateDoc(notiRef, { leido: true });
+    noti.leido = true;
+
+    // Ver si aún hay notificaciones sin leer
+    const q = query(
+      collection(db, `users/${user.uid}/notificaciones`),
+      where('leido', '==', false)
+    );
+    const snapshot = await getDocs(q);
+    this.notificacionesService.actualizarEstado(snapshot.size > 0);
+  }
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
@@ -52,6 +100,6 @@ export class NotificacionesEmpresaComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/home']); // o cambia el tab en HomeComponent si estás usando una sola vista
+    this.router.navigate(['/home']);
   }
 }
