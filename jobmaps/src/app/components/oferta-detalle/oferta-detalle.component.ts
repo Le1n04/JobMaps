@@ -7,6 +7,7 @@ import { FavoritosService } from '../../services/favoritos.service';
 import { AplicacionesService } from '../../services/aplicaciones.service';
 import { getAuth } from '@angular/fire/auth';
 import { getDownloadURL, getStorage, ref } from 'firebase/storage';
+import { Oferta } from '../../services/job.service';
 
 @Component({
   selector: 'app-oferta-detalle',
@@ -26,10 +27,13 @@ export class OfertaDetalleComponent implements OnInit {
   @Input() empresaId = ''; // 🆕
   @Input() onCerrar: () => void = () => {};
   @Output() onEliminarFavorito = new EventEmitter<string>();
+  @Output() onOfertaEliminada = new EventEmitter<string>();
+  @Output() onEditarOferta = new EventEmitter<Oferta & { id: string }>();
 
   favorito: boolean = false;
   yaAplicado: boolean = false;
   aplicando: boolean = false;
+  esCreador: boolean = false;
 
   constructor(
     private favoritosService: FavoritosService,
@@ -44,6 +48,61 @@ export class OfertaDetalleComponent implements OnInit {
         this.idOferta
       );
     }
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (user?.uid === this.empresaId) {
+      this.esCreador = true;
+    }
+  }
+
+  editarOferta() {
+    this.onEditarOferta.emit({
+      id: this.idOferta,
+      titulo: this.titulo,
+      descripcion: this.descripcion,
+      salario: this.salario,
+      tipoContrato: this.tipoContrato,
+      inicio: this.inicio,
+      logo: this.logo,
+      empresaId: this.empresaId,
+      ubicacion: undefined!, // ignora esto, solo para tipado
+      creadaEn: '',
+    });
+
+    this.onCerrar(); // cerrar modal
+  }
+
+  confirmarEliminar() {
+    this.snackbar
+      .open('Are you sure you want to delete this?', 'Confirm', {
+        duration: 5000,
+      })
+      .onAction()
+      .subscribe(() => {
+        this.eliminarOferta();
+      });
+  }
+
+  async eliminarOferta() {
+    try {
+      const db = (await import('@angular/fire/firestore')).getFirestore();
+      const { doc, deleteDoc } = await import('firebase/firestore');
+      await deleteDoc(doc(db, 'ofertas', this.idOferta));
+
+      this.snackbar.open('Post deleted.', 'Close', {
+        duration: 3000,
+        panelClass: ['snackbar-success'],
+      });
+
+      this.onOfertaEliminada.emit(this.idOferta); // 🔥 Notificamos que se ha borrado
+      this.onCerrar(); // Cerramos el modal
+    } catch (error) {
+      console.error('Error while deleting the post:', error);
+      this.snackbar.open('Error while deleting the post.', 'Close', {
+        duration: 3000,
+      });
+    }
   }
 
   async aplicar() {
@@ -55,7 +114,7 @@ export class OfertaDetalleComponent implements OnInit {
     const storage = getStorage();
 
     if (!user) {
-      this.snackbar.open('Debes estar logueado para aplicar.', 'Cerrar', {
+      this.snackbar.open('You must be logged to apply.', 'Close', {
         duration: 3000,
       });
       this.aplicando = false;
@@ -76,18 +135,22 @@ export class OfertaDetalleComponent implements OnInit {
         this.titulo
       );
 
-      this.snackbar.open('Has aplicado correctamente a la oferta.', 'Cerrar', {
-        duration: 3000,
-        panelClass: ['snackbar-success'],
-      });
+      this.snackbar.open(
+        'You have succesfully applied to the position.',
+        'Close',
+        {
+          duration: 3000,
+          panelClass: ['snackbar-success'],
+        }
+      );
 
       this.yaAplicado = true;
     } catch (error: any) {
-      console.error('Error al aplicar:', error);
+      console.error('Error while applying:', error);
       const msg = error?.message?.includes('storage')
-        ? 'Debes subir tu CV en el perfil antes de aplicar a una oferta.'
-        : 'Ocurrió un error al aplicar.';
-      this.snackbar.open(msg, 'Cerrar', { duration: 4000 });
+        ? 'You must upload your CV before applying for a position.'
+        : 'An error has ocurred.';
+      this.snackbar.open(msg, 'Close', { duration: 4000 });
     }
 
     this.aplicando = false;

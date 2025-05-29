@@ -51,4 +51,11 @@ export class JobService {
       creadaEn: serverTimestamp(),
     });
   }
+
+  async actualizarOferta(id: string, data: Partial<Oferta>) {
+    const { doc, updateDoc } = await import('firebase/firestore');
+    const db = (await import('@angular/fire/firestore')).getFirestore();
+    const ref = doc(db, 'ofertas', id);
+    return updateDoc(ref, data);
+  }
 }

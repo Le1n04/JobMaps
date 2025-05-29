@@ -23,9 +23,17 @@
         class="apply-btn"
         (click)="aplicar()"
         [disabled]="yaAplicado || aplicando"
+        *ngIf="!esCreador"
       >
         {{ yaAplicado ? "You have applied" : "Apply" }}
       </button>
+      <!-- Botones solo visibles si es el creador -->
+      <div *ngIf="esCreador" class="admin-actions">
+        <button class="edit-btn" (click)="editarOferta()">Edit</button>
+        <button class="delete-btn" (click)="confirmarEliminar()">
+          Delete
+        </button>
+      </div>
     </div>
   </div>
 </div>

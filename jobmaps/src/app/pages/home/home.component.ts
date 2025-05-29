@@ -10,7 +10,7 @@ import * as L from 'leaflet';
 import { OfertaDetalleComponent } from '../../components/oferta-detalle/oferta-detalle.component';
 import { SnackbarService } from '../../services/snackbar.service';
 import { NotificacionesEmpresaComponent } from '../notificaciones-empresa/notificaciones-empresa.component';
-import { BottomNavComponent } from "../../components/bottom-nav/bottom-nav.component";
+import { BottomNavComponent } from '../../components/bottom-nav/bottom-nav.component';
 
 @Component({
   selector: 'app-home',
@@ -25,8 +25,8 @@ import { BottomNavComponent } from "../../components/bottom-nav/bottom-nav.compo
     FormsModule,
     OfertaDetalleComponent,
     NotificacionesEmpresaComponent,
-    BottomNavComponent
-],
+    BottomNavComponent,
+  ],
 })
 export class HomeComponent implements AfterViewInit {
   view: 'map' | 'list' = 'map';
@@ -44,6 +44,7 @@ export class HomeComponent implements AfterViewInit {
   tipoContrato: string = '';
   inicio: string = '';
   logoUrl: string = '';
+  modoEdicion: boolean = false;
   jobs: (Oferta & { id: string })[] = [];
 
   constructor(
@@ -107,18 +108,28 @@ export class HomeComponent implements AfterViewInit {
 
     try {
       await this.jobService.crearOferta(oferta);
-      this.snackbar.mostrar('Oferta publicada correctamente.', 'ok');
+      this.snackbar.mostrar('Job offer posted successfully.', 'ok');
       await this.loadJobs();
       this.resetFormulario();
     } catch (error) {
-      console.error('Error al publicar la oferta:', error);
-      this.snackbar.mostrar('Error al guardar la oferta.', 'error');
+      console.error('Error while posting the offer:', error);
+      this.snackbar.mostrar('Error while saving the post.', 'error');
     }
   }
 
   cerrarModalOferta = () => {
     this.selectedOferta = null;
   };
+
+  onOfertaEliminada() {
+    this.selectedOferta = null;
+
+    if (this.view !== 'map') {
+      this.view = 'map';
+    }
+
+    this.loadJobs();
+  }
 
   resetFormulario() {
     this.titulo = '';
@@ -168,7 +179,7 @@ export class HomeComponent implements AfterViewInit {
   async ngAfterViewInit(): Promise<void> {
     if (!this.isBrowser) return;
 
-    await this.userService.usuarioCargado; // ⏳ Esperar a que se cargue el usuario
+    await this.userService.usuarioCargado;
 
     const L = await import('leaflet');
     const { lat, lng } = this.userService.location;
@@ -186,7 +197,23 @@ export class HomeComponent implements AfterViewInit {
   }
 
   abrirFormularioOferta() {
+    this.resetFormulario();
+    this.modoEdicion = false;
     this.mostrarPopup = true;
+  }
+
+  editarOferta(oferta: Oferta & { id: string }) {
+    this.selectedOferta = oferta;
+    this.modoEdicion = true;
+    this.mostrarPopup = true;
+
+    this.titulo = oferta.titulo;
+    this.descripcion = oferta.descripcion;
+    this.salario = oferta.salario;
+    this.tipoContrato = oferta.tipoContrato;
+    this.inicio = oferta.inicio;
+    this.logoUrl = oferta.logo;
+    this.direccionTexto = '';
   }
 
   setActiveTab(tab: string) {
@@ -194,12 +221,37 @@ export class HomeComponent implements AfterViewInit {
 
     if (tab === 'profile') {
       this.router.navigate(['/profile-settings']);
-    }
-    else if (tab === 'favourites') {
+    } else if (tab === 'favourites') {
       this.router.navigate(['/favoritos']);
-    }
-    else if (tab === 'notifications') {
+    } else if (tab === 'notifications') {
       this.router.navigate(['/notifications']);
+    }
+  }
+
+  async guardarCambios() {
+    if (!this.selectedOferta) return;
+
+    try {
+      const datosActualizados: Partial<Oferta> = {
+        titulo: this.titulo,
+        descripcion: this.descripcion,
+        salario: this.salario,
+        tipoContrato: this.tipoContrato,
+        inicio: this.inicio,
+        logo: this.logoUrl,
+      };
+
+      await this.jobService.actualizarOferta(
+        this.selectedOferta.id,
+        datosActualizados
+      );
+
+      this.snackbar.mostrar('Post updated correctly.', 'ok');
+      this.mostrarPopup = false;
+      await this.loadJobs();
+    } catch (error) {
+      console.error('Error while updating the post:', error);
+      this.snackbar.mostrar('Error while saving changes.', 'error');
     }
   }
 

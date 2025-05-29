@@ -62,15 +62,18 @@
   <!-- Popup para nueva oferta -->
   <div class="popup-overlay" *ngIf="mostrarPopup">
     <div class="popup">
-      <h3>Nueva oferta</h3>
-      <form (ngSubmit)="crearOferta()" #form="ngForm">
+      <h3>Job Offer</h3>
+      <form
+        (ngSubmit)="modoEdicion ? guardarCambios() : crearOferta()"
+        #form="ngForm"
+      >
         <div class="form-field">
-          <label for="titulo">Nombre de la empresa</label>
+          <label for="titulo">Name of the Company</label>
           <input id="titulo" name="titulo" [(ngModel)]="titulo" required />
         </div>
 
         <div class="form-field">
-          <label for="descripcion">Puesto ofrecido</label>
+          <label for="descripcion">Position Offered</label>
           <input
             id="descripcion"
             name="descripcion"
@@ -80,7 +83,7 @@
         </div>
 
         <div class="form-field">
-          <label for="inicio">Fecha de inicio</label>
+          <label for="inicio">Start Date</label>
           <input
             id="inicio"
             type="date"
@@ -91,7 +94,7 @@
         </div>
 
         <div class="form-field">
-          <label for="salario">Salario mensual (€)</label>
+          <label for="salario">Monthly Salary (€)</label>
           <input
             id="salario"
             type="number"
@@ -103,29 +106,29 @@
         </div>
 
         <div class="form-field">
-          <label for="tipoContrato">Tipo de contrato</label>
+          <label for="tipoContrato">Contract Type</label>
           <select
             id="tipoContrato"
             name="tipoContrato"
             [(ngModel)]="tipoContrato"
             required
           >
-            <option value="" disabled selected>Selecciona una opción</option>
-            <option value="Jornada completa">Jornada completa</option>
-            <option value="Parcial">Parcial</option>
+            <option value="" disabled selected>Select an option</option>
+            <option value="Jornada completa">Full-time</option>
+            <option value="Parcial">Part-time</option>
             <option value="Temporal">Temporal</option>
-            <option value="Prácticas">Prácticas</option>
-            <option value="Autónomo">Autónomo</option>
+            <option value="Prácticas">Internship</option>
+            <option value="Autónomo">Freelance</option>
           </select>
         </div>
 
         <div class="form-field">
-          <label for="logoUrl">URL del logo</label>
+          <label for="logoUrl">Logo URL</label>
           <input id="logoUrl" name="logoUrl" [(ngModel)]="logoUrl" required />
         </div>
 
         <div class="form-field">
-          <label for="direccion">Dirección del lugar de trabajo</label>
+          <label for="direccion">Position Location</label>
           <input
             id="direccion"
             type="text"
@@ -137,12 +140,14 @@
         </div>
 
         <div *ngIf="direccionInvalida" class="error-text">
-          Error: No se ha podido encontrar la dirección introducida.
+          Error: Couldn't find that location.
         </div>
 
         <div class="popup-buttons">
-          <button type="submit" [disabled]="form.invalid">Publicar</button>
-          <button type="button" (click)="mostrarPopup = false">Cancelar</button>
+          <button type="submit" [disabled]="form.invalid">
+            {{ modoEdicion ? "Save changes" : "Post" }}
+          </button>
+          <button type="button" (click)="mostrarPopup = false">Cancel</button>
         </div>
       </form>
     </div>
@@ -160,4 +165,6 @@
   [idOferta]="selectedOferta.id"
   [empresaId]="selectedOferta.empresaId"
   [onCerrar]="cerrarModalOferta"
+  (onEditarOferta)="editarOferta($event)"
+  (onOfertaEliminada)="onOfertaEliminada()"
 />
