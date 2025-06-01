@@ -2,8 +2,7 @@
   <!-- Mapa -->
   <div
     id="map"
-    class="leaflet-container"
-    *ngIf="activeTab !== 'notifications' && view === 'map'"
+    [ngClass]="{ hidden: activeTab === 'notifications' || view !== 'map' }"
   ></div>
 
   <!-- Lista de ofertas -->
@@ -29,7 +28,7 @@
     *ngIf="activeTab === 'notifications'"
   ></app-notificaciones-empresa>
 
-  <!-- Superposición superior -->
+  <!-- Barra superior -->
   <div class="overlay top-overlay" *ngIf="activeTab !== 'notifications'">
     <div class="search-bar">
       <input type="text" placeholder="Search" />
@@ -37,10 +36,10 @@
     </div>
 
     <div class="view-toggle">
-      <button [class.active]="view === 'list'" (click)="view = 'list'">
+      <button [class.active]="view === 'list'" (click)="setView('list')">
         List
       </button>
-      <button [class.active]="view === 'map'" (click)="view = 'map'">
+      <button [class.active]="view === 'map'" (click)="setView('map')">
         Map
       </button>
     </div>
@@ -52,7 +51,7 @@
     (tabChange)="setActiveTab($event)"
   ></app-bottom-nav>
 
-  <!-- Botón flotante solo para EMPRESA -->
+  <!-- Botón flotante solo para empresa -->
   <button
     *ngIf="isEmpresa && activeTab === 'browse'"
     class="fab"
@@ -62,14 +61,100 @@
     +
   </button>
 
-  <!-- Popup único para crear/editar oferta -->
+  <!-- Popup para CREAR oferta -->
   <div class="popup-overlay" *ngIf="mostrarPopup">
     <div class="popup">
-      <h3>{{ modoEdicion ? "Edit Job Offer" : "New Job Offer" }}</h3>
-      <form
-        (ngSubmit)="modoEdicion ? guardarCambios() : crearOferta()"
-        #form="ngForm"
-      >
+      <h3>New Job Offer</h3>
+      <form (ngSubmit)="crearOferta()" #form="ngForm">
+        <div class="form-field">
+          <label for="titulo">Company Name</label>
+          <input id="titulo" name="titulo" [(ngModel)]="titulo" required />
+        </div>
+
+        <div class="form-field">
+          <label for="descripcion">Position Offered</label>
+          <input
+            id="descripcion"
+            name="descripcion"
+            [(ngModel)]="descripcion"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="inicio">Start Date</label>
+          <input
+            id="inicio"
+            type="date"
+            name="inicio"
+            [(ngModel)]="inicio"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="salario">Monthly Salary (€)</label>
+          <input
+            id="salario"
+            type="number"
+            name="salario"
+            [(ngModel)]="salario"
+            min="0"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="tipoContrato">Contract Type</label>
+          <select
+            id="tipoContrato"
+            name="tipoContrato"
+            [(ngModel)]="tipoContrato"
+            required
+          >
+            <option value="" disabled selected>Select an option</option>
+            <option value="Jornada completa">Full-time</option>
+            <option value="Parcial">Part-time</option>
+            <option value="Temporal">Temporary</option>
+            <option value="Prácticas">Internship</option>
+            <option value="Autónomo">Freelance</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="logoUrl">Logo URL</label>
+          <input id="logoUrl" name="logoUrl" [(ngModel)]="logoUrl" required />
+        </div>
+
+        <div class="form-field">
+          <label for="direccion">Location</label>
+          <input
+            id="direccion"
+            type="text"
+            name="direccion"
+            [(ngModel)]="direccionTexto"
+            placeholder="E.g.: Avenida Isabel Manoja, Torremolinos"
+            required
+          />
+        </div>
+
+        <div *ngIf="direccionInvalida" class="error-text">
+          Error: Couldn't find that location.
+        </div>
+
+        <div class="popup-buttons">
+          <button type="submit" [disabled]="form.invalid">Post</button>
+          <button type="button" (click)="mostrarPopup = false">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Popup para EDITAR oferta -->
+  <div class="popup-overlay" *ngIf="mostrarPopupEdicion">
+    <div class="popup">
+      <h3>Edit Job Offer</h3>
+      <form (ngSubmit)="guardarCambios()" #formEdicion="ngForm">
         <div class="form-field">
           <label for="titulo">Company Name</label>
           <input id="titulo" name="titulo" [(ngModel)]="titulo" required />
@@ -130,35 +215,20 @@
           <input id="logoUrl" name="logoUrl" [(ngModel)]="logoUrl" required />
         </div>
 
-        <!-- Solo mostrar campo ubicación al crear (no al editar) -->
-        <div class="form-field" *ngIf="!modoEdicion">
-          <label for="direccion">Location</label>
-          <input
-            id="direccion"
-            type="text"
-            name="direccion"
-            [(ngModel)]="direccionTexto"
-            placeholder="E.g.: Avenida Isabel Manoja, Torremolinos"
-            required
-          />
-        </div>
-
-        <div *ngIf="direccionInvalida" class="error-text">
-          Error: Couldn't find that location.
-        </div>
+        <!-- Aquí no mostramos 'direccion' porque no editamos ubicación -->
 
         <div class="popup-buttons">
-          <button type="submit" [disabled]="form.invalid">
-            {{ modoEdicion ? "Save Changes" : "Post" }}
+          <button type="submit" [disabled]="formEdicion.invalid">
+            Save Changes
           </button>
-          <button type="button" (click)="mostrarPopup = false">Cancel</button>
+          <button type="button" (click)="cerrarPopupEdicion()">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Modal de detalle de oferta -->
+<!-- Detalle de oferta -->
 <app-oferta-detalle
   *ngIf="selectedOferta"
   [titulo]="selectedOferta.titulo"
@@ -172,4 +242,4 @@
   [onCerrar]="cerrarModalOferta"
   (onEditarOferta)="editarOferta($event)"
   (onOfertaEliminada)="onOfertaEliminada()"
-></app-oferta-detalle>
+/>

@@ -1,14 +1,12 @@
 import { Component, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser, CommonModule } from '@angular/common';
+import { isPlatformBrowser, NgIf, NgFor, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { JobService, Oferta } from '../../services/job.service';
 import { SnackbarService } from '../../services/snackbar.service';
-
 import { OfertaDetalleComponent } from '../../components/oferta-detalle/oferta-detalle.component';
 import { NotificacionesEmpresaComponent } from '../notificaciones-empresa/notificaciones-empresa.component';
 import { BottomNavComponent } from '../../components/bottom-nav/bottom-nav.component';
@@ -22,6 +20,8 @@ import * as L from 'leaflet';
   styleUrl: './home.component.scss',
   imports: [
     CommonModule,
+    NgIf,
+    NgFor,
     FormsModule,
     MatIconModule,
     OfertaDetalleComponent,
@@ -34,21 +34,20 @@ export class HomeComponent implements AfterViewInit {
   activeTab: string = 'browse';
   isBrowser: boolean;
   mostrarPopup = false;
-  modoEdicion = false;              // 🔥 modo crear/editar
+  mostrarPopupEdicion = false; // Popup para EDITAR oferta
   map!: L.Map;
   marcadores: L.Marker[] = [];
   direccionTexto: string = '';
   direccionInvalida = false;
   selectedOferta: (Oferta & { id: string }) | null = null;
-
-  // Campos del formulario
+  edicionOferta: (Oferta & { id: string }) | null = null; // Editar
   titulo: string = '';
   descripcion: string = '';
   salario: number = 0;
   tipoContrato: string = '';
   inicio: string = '';
   logoUrl: string = '';
-
+  //modoEdicion: boolean = false;
   jobs: (Oferta & { id: string })[] = [];
 
   constructor(
@@ -62,7 +61,9 @@ export class HomeComponent implements AfterViewInit {
     this.isBrowser = isPlatformBrowser(platformId);
   }
 
-  async convertirDireccionACoordenadas(direccion: string): Promise<{ lat: number; lng: number } | null> {
+  async convertirDireccionACoordenadas(
+    direccion: string
+  ): Promise<{ lat: number; lng: number } | null> {
     const query = encodeURIComponent(direccion);
     const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`;
 
@@ -87,7 +88,9 @@ export class HomeComponent implements AfterViewInit {
   async crearOferta() {
     this.direccionInvalida = false;
 
-    const coords = await this.convertirDireccionACoordenadas(this.direccionTexto);
+    const coords = await this.convertirDireccionACoordenadas(
+      this.direccionTexto
+    );
 
     if (!coords) {
       this.direccionInvalida = true;
@@ -119,7 +122,13 @@ export class HomeComponent implements AfterViewInit {
 
   cerrarModalOferta = () => {
     this.selectedOferta = null;
+    this.mostrarPopup = false;
   };
+
+  cerrarPopupEdicion() {
+    this.edicionOferta = null;
+    this.mostrarPopupEdicion = false;
+  }
 
   onOfertaEliminada() {
     this.selectedOferta = null;
@@ -138,10 +147,8 @@ export class HomeComponent implements AfterViewInit {
     this.inicio = '';
     this.direccionTexto = '';
     this.direccionInvalida = false;
-
-    this.selectedOferta = null;  // 🔥 limpiar oferta
-    this.modoEdicion = false;    // 🔥 salir modo edición
-    this.mostrarPopup = false;   // 🔥 cerrar popup
+    this.selectedOferta = null;
+    this.edicionOferta = null;
   }
 
   async loadJobs() {
@@ -186,42 +193,69 @@ export class HomeComponent implements AfterViewInit {
 
     this.map = L.map('map').setView([lat, lng], 13);
 
-    L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap contributors &copy; Carto',
-      subdomains: 'abcd',
-      maxZoom: 19,
-    }).addTo(this.map);
+    L.tileLayer(
+      'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
+      {
+        attribution: '&copy; OpenStreetMap contributors &copy; Carto',
+        subdomains: 'abcd',
+        maxZoom: 19,
+      }
+    ).addTo(this.map);
 
-    // 🔥 IMPORTANTE: cargar ofertas tras el mapa
     await this.loadJobs();
   }
 
   abrirFormularioOferta() {
     this.resetFormulario();
-    this.modoEdicion = false;    // 🔥 modo crear
     this.mostrarPopup = true;
   }
 
   editarOferta(oferta: Oferta & { id: string }) {
-    this.resetFormulario();     // 🔥 importante limpiar antes
-    this.selectedOferta = oferta;
-    this.modoEdicion = true;     // 🔥 modo editar
-    this.mostrarPopup = true;
+    this.edicionOferta = oferta;
+    this.mostrarPopup = false;
+    this.mostrarPopupEdicion = true;
 
-    // Cargar datos en el formulario
     this.titulo = oferta.titulo;
     this.descripcion = oferta.descripcion;
     this.salario = oferta.salario;
     this.tipoContrato = oferta.tipoContrato;
     this.inicio = oferta.inicio;
     this.logoUrl = oferta.logo;
+    this.direccionTexto = ''; // por ahora no editamos ubicación
+  }
+
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+
+    // Navegación a otras páginas si toca
+    if (tab === 'profile') {
+      this.router.navigate(['/profile-settings']);
+    } else if (tab === 'favourites') {
+      this.router.navigate(['/favoritos']);
+    } else if (tab === 'notifications') {
+      this.router.navigate(['/notifications']);
+    } else if (tab === 'browse') {
+      // Cuando vuelves a "browse", asegúrate de que el mapa se recalcula
+      if (this.view === 'map' && this.map) {
+        setTimeout(() => {
+          this.map.invalidateSize();
+        }, 200); // pequeño delay para que se haya renderizado
+      }
+    }
+  }
+
+  setView(newView: 'map' | 'list') {
+    this.view = newView;
+
+    if (newView === 'map' && this.map) {
+      setTimeout(() => {
+        this.map.invalidateSize();
+      }, 200); // muy importante para que el mapa se refresque al volver
+    }
   }
 
   async guardarCambios() {
-    if (!this.selectedOferta) {
-      console.error('No offer selected for editing.');
-      return;
-    }
+    if (!this.edicionOferta) return;
 
     try {
       const datosActualizados: Partial<Oferta> = {
@@ -233,31 +267,23 @@ export class HomeComponent implements AfterViewInit {
         logo: this.logoUrl,
       };
 
-      await this.jobService.actualizarOferta(this.selectedOferta.id, datosActualizados);
+      await this.jobService.actualizarOferta(
+        this.edicionOferta.id,
+        datosActualizados
+      );
+
       this.snackbar.mostrar('Offer updated successfully.', 'ok');
+      this.cerrarPopupEdicion();
       await this.loadJobs();
-      this.resetFormulario();   // 🔥 importante resetear tras guardar
     } catch (error) {
       console.error('Error updating the offer:', error);
-      this.snackbar.mostrar('Error saving changes.', 'error');
+      this.snackbar.mostrar('Error while updating the offer.', 'error');
     }
   }
 
   async ngOnInit(): Promise<void> {
     await this.userService.usuarioCargado;
     await this.loadJobs();
-  }
-
-  setActiveTab(tab: string) {
-    this.activeTab = tab;
-
-    if (tab === 'profile') {
-      this.router.navigate(['/profile-settings']);
-    } else if (tab === 'favourites') {
-      this.router.navigate(['/favoritos']);
-    } else if (tab === 'notifications') {
-      this.router.navigate(['/notifications']);
-    }
   }
 
   get isEmpresa() {
