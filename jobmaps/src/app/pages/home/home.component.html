@@ -1,6 +1,10 @@
 <div class="map-wrapper">
   <!-- Mapa -->
-  <div id="map" *ngIf="activeTab !== 'notifications' && view === 'map'"></div>
+  <div
+    id="map"
+    class="leaflet-container"
+    *ngIf="activeTab !== 'notifications' && view === 'map'"
+  ></div>
 
   <!-- Lista de ofertas -->
   <div
@@ -13,7 +17,7 @@
         <h3>{{ job.titulo }}</h3>
         <p>{{ job.descripcion }}</p>
         <div class="meta">
-          <span>{{ job.inicio | date: "d MMMM y" }}</span>
+          <span>{{ job.inicio | date : "d MMMM y" }}</span>
           <span>{{ job.salario }} €</span>
         </div>
       </div>
@@ -21,9 +25,11 @@
   </div>
 
   <!-- Vista de notificaciones -->
-  <app-notificaciones-empresa *ngIf="activeTab === 'notifications'"></app-notificaciones-empresa>
+  <app-notificaciones-empresa
+    *ngIf="activeTab === 'notifications'"
+  ></app-notificaciones-empresa>
 
-  <!-- Barra superior -->
+  <!-- Superposición superior -->
   <div class="overlay top-overlay" *ngIf="activeTab !== 'notifications'">
     <div class="search-bar">
       <input type="text" placeholder="Search" />
@@ -46,7 +52,7 @@
     (tabChange)="setActiveTab($event)"
   ></app-bottom-nav>
 
-  <!-- Botón flotante solo para empresa -->
+  <!-- Botón flotante solo para EMPRESA -->
   <button
     *ngIf="isEmpresa && activeTab === 'browse'"
     class="fab"
@@ -56,11 +62,14 @@
     +
   </button>
 
-  <!-- Popup para CREAR oferta -->
+  <!-- Popup único para crear/editar oferta -->
   <div class="popup-overlay" *ngIf="mostrarPopup">
     <div class="popup">
-      <h3>New Job Offer</h3>
-      <form (ngSubmit)="crearOferta()" #form="ngForm">
+      <h3>{{ modoEdicion ? "Edit Job Offer" : "New Job Offer" }}</h3>
+      <form
+        (ngSubmit)="modoEdicion ? guardarCambios() : crearOferta()"
+        #form="ngForm"
+      >
         <div class="form-field">
           <label for="titulo">Company Name</label>
           <input id="titulo" name="titulo" [(ngModel)]="titulo" required />
@@ -68,23 +77,46 @@
 
         <div class="form-field">
           <label for="descripcion">Position Offered</label>
-          <input id="descripcion" name="descripcion" [(ngModel)]="descripcion" required />
+          <input
+            id="descripcion"
+            name="descripcion"
+            [(ngModel)]="descripcion"
+            required
+          />
         </div>
 
         <div class="form-field">
           <label for="inicio">Start Date</label>
-          <input id="inicio" type="date" name="inicio" [(ngModel)]="inicio" required />
+          <input
+            id="inicio"
+            type="date"
+            name="inicio"
+            [(ngModel)]="inicio"
+            required
+          />
         </div>
 
         <div class="form-field">
           <label for="salario">Monthly Salary (€)</label>
-          <input id="salario" type="number" name="salario" [(ngModel)]="salario" min="0" required />
+          <input
+            id="salario"
+            type="number"
+            name="salario"
+            [(ngModel)]="salario"
+            min="0"
+            required
+          />
         </div>
 
         <div class="form-field">
           <label for="tipoContrato">Contract Type</label>
-          <select id="tipoContrato" name="tipoContrato" [(ngModel)]="tipoContrato" required>
-            <option value="" disabled selected>Select an option</option>
+          <select
+            id="tipoContrato"
+            name="tipoContrato"
+            [(ngModel)]="tipoContrato"
+            required
+          >
+            <option value="" disabled>Select an option</option>
             <option value="Jornada completa">Full-time</option>
             <option value="Parcial">Part-time</option>
             <option value="Temporal">Temporary</option>
@@ -98,7 +130,8 @@
           <input id="logoUrl" name="logoUrl" [(ngModel)]="logoUrl" required />
         </div>
 
-        <div class="form-field">
+        <!-- Solo mostrar campo ubicación al crear (no al editar) -->
+        <div class="form-field" *ngIf="!modoEdicion">
           <label for="direccion">Location</label>
           <input
             id="direccion"
@@ -115,67 +148,17 @@
         </div>
 
         <div class="popup-buttons">
-          <button type="submit" [disabled]="form.invalid">Post</button>
+          <button type="submit" [disabled]="form.invalid">
+            {{ modoEdicion ? "Save Changes" : "Post" }}
+          </button>
           <button type="button" (click)="mostrarPopup = false">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Popup para EDITAR oferta -->
-  <div class="popup-overlay" *ngIf="mostrarPopupEdicion">
-    <div class="popup">
-      <h3>Edit Job Offer</h3>
-      <form (ngSubmit)="guardarCambios()" #formEdicion="ngForm">
-        <div class="form-field">
-          <label for="titulo">Company Name</label>
-          <input id="titulo" name="titulo" [(ngModel)]="titulo" required />
-        </div>
-
-        <div class="form-field">
-          <label for="descripcion">Position Offered</label>
-          <input id="descripcion" name="descripcion" [(ngModel)]="descripcion" required />
-        </div>
-
-        <div class="form-field">
-          <label for="inicio">Start Date</label>
-          <input id="inicio" type="date" name="inicio" [(ngModel)]="inicio" required />
-        </div>
-
-        <div class="form-field">
-          <label for="salario">Monthly Salary (€)</label>
-          <input id="salario" type="number" name="salario" [(ngModel)]="salario" min="0" required />
-        </div>
-
-        <div class="form-field">
-          <label for="tipoContrato">Contract Type</label>
-          <select id="tipoContrato" name="tipoContrato" [(ngModel)]="tipoContrato" required>
-            <option value="" disabled>Select an option</option>
-            <option value="Jornada completa">Full-time</option>
-            <option value="Parcial">Part-time</option>
-            <option value="Temporal">Temporary</option>
-            <option value="Prácticas">Internship</option>
-            <option value="Autónomo">Freelance</option>
-          </select>
-        </div>
-
-        <div class="form-field">
-          <label for="logoUrl">Logo URL</label>
-          <input id="logoUrl" name="logoUrl" [(ngModel)]="logoUrl" required />
-        </div>
-
-        <!-- Aquí no mostramos 'direccion' porque no editamos ubicación -->
-
-        <div class="popup-buttons">
-          <button type="submit" [disabled]="formEdicion.invalid">Save Changes</button>
-          <button type="button" (click)="cerrarPopupEdicion()">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Detalle de oferta -->
+<!-- Modal de detalle de oferta -->
 <app-oferta-detalle
   *ngIf="selectedOferta"
   [titulo]="selectedOferta.titulo"
@@ -189,4 +172,4 @@
   [onCerrar]="cerrarModalOferta"
   (onEditarOferta)="editarOferta($event)"
   (onOfertaEliminada)="onOfertaEliminada()"
-/>
+></app-oferta-detalle>

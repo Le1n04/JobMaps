@@ -6,7 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'dist/jobmaps/browser',
   server: {
     cleartext: true,
-    androidScheme: 'https', // 👈 importante para evitar bloqueos de WebView
+    androidScheme: 'https', // 👈 necesario
+    allowNavigation: ['*.stadiamaps.com', '*.openstreetmap.org'], // 👈 ESTO
   },
 };
 
