@@ -53,9 +53,9 @@ export class JobService {
   }
 
   async actualizarOferta(id: string, data: Partial<Oferta>) {
+    console.log('Actualizando oferta con ID:', id, 'y datos:', data);
     const { doc, updateDoc } = await import('firebase/firestore');
-    const db = (await import('@angular/fire/firestore')).getFirestore();
-    const ref = doc(db, 'ofertas', id);
+    const ref = doc(this.db, 'ofertas', id);
     return updateDoc(ref, data);
   }
 }

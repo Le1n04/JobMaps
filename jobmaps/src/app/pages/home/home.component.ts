@@ -32,19 +32,20 @@ export class HomeComponent implements AfterViewInit {
   view: 'map' | 'list' = 'map';
   activeTab: string = 'browse';
   isBrowser: boolean;
-  mostrarPopup = false;
+  mostrarPopup = false; // Popup para CREAR oferta
+  mostrarPopupEdicion = false; // Popup para EDITAR oferta
   map!: any;
   marcadores: any[] = [];
   direccionTexto: string = '';
   direccionInvalida = false;
-  selectedOferta: (Oferta & { id: string }) | null = null;
+  selectedOferta: (Oferta & { id: string }) | null = null; // Ver detalle
+  edicionOferta: (Oferta & { id: string }) | null = null; // Editar
   titulo: string = '';
   descripcion: string = '';
   salario: number = 0;
   tipoContrato: string = '';
   inicio: string = '';
   logoUrl: string = '';
-  modoEdicion: boolean = false;
   jobs: (Oferta & { id: string })[] = [];
 
   constructor(
@@ -74,7 +75,6 @@ export class HomeComponent implements AfterViewInit {
           lng: parseFloat(data[0].lon),
         };
       }
-
       return null;
     } catch (error) {
       console.error('Error geocodificando dirección:', error);
@@ -119,15 +119,19 @@ export class HomeComponent implements AfterViewInit {
 
   cerrarModalOferta = () => {
     this.selectedOferta = null;
+    this.mostrarPopup = false;
   };
+
+  cerrarPopupEdicion() {
+    this.edicionOferta = null;
+    this.mostrarPopupEdicion = false;
+  }
 
   onOfertaEliminada() {
     this.selectedOferta = null;
-
     if (this.view !== 'map') {
       this.view = 'map';
     }
-
     this.loadJobs();
   }
 
@@ -140,7 +144,8 @@ export class HomeComponent implements AfterViewInit {
     this.inicio = '';
     this.direccionTexto = '';
     this.direccionInvalida = false;
-    this.mostrarPopup = false;
+    this.selectedOferta = null;
+    this.edicionOferta = null;
   }
 
   async loadJobs() {
@@ -198,14 +203,13 @@ export class HomeComponent implements AfterViewInit {
 
   abrirFormularioOferta() {
     this.resetFormulario();
-    this.modoEdicion = false;
     this.mostrarPopup = true;
   }
 
   editarOferta(oferta: Oferta & { id: string }) {
-    this.selectedOferta = oferta;
-    this.modoEdicion = true;
-    this.mostrarPopup = true;
+    this.edicionOferta = oferta;
+    this.mostrarPopup = false;
+    this.mostrarPopupEdicion = true;
 
     this.titulo = oferta.titulo;
     this.descripcion = oferta.descripcion;
@@ -213,23 +217,11 @@ export class HomeComponent implements AfterViewInit {
     this.tipoContrato = oferta.tipoContrato;
     this.inicio = oferta.inicio;
     this.logoUrl = oferta.logo;
-    this.direccionTexto = '';
-  }
-
-  setActiveTab(tab: string) {
-    this.activeTab = tab;
-
-    if (tab === 'profile') {
-      this.router.navigate(['/profile-settings']);
-    } else if (tab === 'favourites') {
-      this.router.navigate(['/favoritos']);
-    } else if (tab === 'notifications') {
-      this.router.navigate(['/notifications']);
-    }
+    this.direccionTexto = ''; // por ahora no editamos ubicación
   }
 
   async guardarCambios() {
-    if (!this.selectedOferta) return;
+    if (!this.edicionOferta) return;
 
     try {
       const datosActualizados: Partial<Oferta> = {
@@ -242,22 +234,34 @@ export class HomeComponent implements AfterViewInit {
       };
 
       await this.jobService.actualizarOferta(
-        this.selectedOferta.id,
+        this.edicionOferta.id,
         datosActualizados
       );
 
-      this.snackbar.mostrar('Post updated correctly.', 'ok');
-      this.mostrarPopup = false;
+      this.snackbar.mostrar('Offer updated successfully.', 'ok');
+      this.cerrarPopupEdicion();
       await this.loadJobs();
     } catch (error) {
-      console.error('Error while updating the post:', error);
-      this.snackbar.mostrar('Error while saving changes.', 'error');
+      console.error('Error updating the offer:', error);
+      this.snackbar.mostrar('Error while updating the offer.', 'error');
     }
   }
 
   async ngOnInit(): Promise<void> {
     await this.userService.usuarioCargado;
     this.loadJobs();
+  }
+
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+
+    if (tab === 'profile') {
+      this.router.navigate(['/profile-settings']);
+    } else if (tab === 'favourites') {
+      this.router.navigate(['/favoritos']);
+    } else if (tab === 'notifications') {
+      this.router.navigate(['/notifications']);
+    }
   }
 
   get isEmpresa() {
