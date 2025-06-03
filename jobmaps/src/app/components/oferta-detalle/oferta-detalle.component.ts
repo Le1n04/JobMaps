@@ -48,12 +48,14 @@ export class OfertaDetalleComponent implements OnInit {
         this.idOferta
       );
     }
-    const auth = getAuth();
-    const user = auth.currentUser;
 
-    if (user?.uid === this.empresaId) {
-      this.esCreador = true;
-    }
+    const auth = getAuth();
+
+    auth.onAuthStateChanged((user) => {
+      if (user && user.uid === this.empresaId) {
+        this.esCreador = true;
+      }
+    });
   }
 
   editarOferta() {

@@ -44,7 +44,84 @@
     [inicio]="selectedOferta.inicio"
     [logo]="selectedOferta.logo"
     [idOferta]="selectedOferta.id"
+    [empresaId]="selectedOferta.empresaId"
     [onCerrar]="cerrarModalOferta"
+    (onEditarOferta)="editarOferta($event)"
     (onEliminarFavorito)="eliminarOfertaDeLista($event)"
   />
+
+  <!-- Popup para EDITAR oferta -->
+  <div class="popup-overlay" *ngIf="mostrarPopupEdicion">
+    <div class="popup">
+      <h3>Edit Job Offer</h3>
+      <form (ngSubmit)="guardarCambios()" #formEdicion="ngForm">
+        <div class="form-field">
+          <label for="titulo">Company Name</label>
+          <input id="titulo" name="titulo" [(ngModel)]="titulo" required />
+        </div>
+
+        <div class="form-field">
+          <label for="descripcion">Position Offered</label>
+          <input
+            id="descripcion"
+            name="descripcion"
+            [(ngModel)]="descripcion"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="inicio">Start Date</label>
+          <input
+            id="inicio"
+            type="date"
+            name="inicio"
+            [(ngModel)]="inicio"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="salario">Monthly Salary (€)</label>
+          <input
+            id="salario"
+            type="number"
+            name="salario"
+            [(ngModel)]="salario"
+            min="0"
+            required
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="tipoContrato">Contract Type</label>
+          <select
+            id="tipoContrato"
+            name="tipoContrato"
+            [(ngModel)]="tipoContrato"
+            required
+          >
+            <option value="" disabled>Select an option</option>
+            <option value="Jornada completa">Full-time</option>
+            <option value="Parcial">Part-time</option>
+            <option value="Temporal">Temporary</option>
+            <option value="Prácticas">Internship</option>
+            <option value="Autónomo">Freelance</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="logoUrl">Logo URL</label>
+          <input id="logoUrl" name="logoUrl" [(ngModel)]="logoUrl" required />
+        </div>
+
+        <div class="popup-buttons">
+          <button type="submit" [disabled]="formEdicion.invalid">
+            Save Changes
+          </button>
+          <button type="button" (click)="cerrarPopupEdicion()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
