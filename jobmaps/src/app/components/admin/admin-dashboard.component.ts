@@ -1,147 +1,105 @@
-import { Component, OnInit } from '@angular/core';
+import { getApps, initializeApp } from 'firebase/app';
+// importacion de decorador para definir el componente
+import { Component } from '@angular/core';
+// importacion de modulo comun de angular
 import { CommonModule } from '@angular/common';
-import { NgFor, NgIf } from '@angular/common';
-import { UserService } from '../../services/user.service'; // Ajusta el path si es diferente
-import { JobService, Oferta, OfertaConId } from '../../services/job.service';
-import { MatIconModule } from '@angular/material/icon'; // Opcional si quieres iconos
-import { MatButtonModule } from '@angular/material/button'; // Para botones más bonitos
-import { MatTableModule } from '@angular/material/table'; // Para tabla Angular Material (opcional, si no quieres tablas HTML normales)
+// importacion de modulo de iconos de angular material
+import { MatIconModule } from '@angular/material/icon';
+// importacion del servicio de rutas de angular
+import { Router } from '@angular/router';
+// importaciones de funciones de firestore
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+} from 'firebase/firestore';
+import { env } from 'process';
+import { environment } from '../../../environments/environment';
 
+// decorador que define las propiedades del componente
 @Component({
-  selector: 'app-admin-dashboard',
-  standalone: true,
-  imports: [
-    CommonModule,
-    NgFor,
-    NgIf,
-    MatIconModule,
-    MatButtonModule,
-    MatTableModule,
-  ],
-  templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.scss'],
+  selector: 'app-admin-dashboard', // selector para usar el componente en html
+  standalone: true, // componente independiente
+  templateUrl: './admin-dashboard.component.html', // ruta del template html
+  styleUrls: ['./admin-dashboard.component.scss'], // ruta de los estilos
+  imports: [CommonModule, MatIconModule], // modulos importados para el template
 })
-export class AdminDashboardComponent implements OnInit {
-  usuarios: any[] = []; // Todos los usuarios aquí
-  ofertas: OfertaConId[] = []; // Todas las ofertas aquí
+export class AdminDashboardComponent {
+  // variable para controlar la vista activa, usuarios o ofertas
+  view: 'usuarios' | 'ofertas' = 'usuarios';
+  // array para almacenar usuarios
+  usuarios: any[] = [];
+  // array para almacenar ofertas
+  ofertas: any[] = [];
+  // variable para la pestaña activa, actualmente no utilizada
+  activeTab: string = 'profile';
 
-  view: 'usuarios' | 'ofertas' = 'usuarios'; // Para cambiar entre pestañas
-
-  constructor(
-    private userService: UserService,
-    private jobService: JobService
-  ) {}
-
-  async ngOnInit(): Promise<void> {
-    await this.loadUsuarios();
-    await this.loadOfertas();
+  // inyeccion de dependencias, router para navegar entre rutas
+  constructor(private router: Router) {
+    if (!getApps().length) {
+      initializeApp(environment.firebase);
+    }
   }
 
-  async loadOfertas() {
-    const snapshot = await this.jobService.getOfertas();
-    this.ofertas = snapshot;
+  // metodo que se ejecuta al iniciar el componente
+  async ngOnInit() {
+    await this.loadUsuarios(); // carga los usuarios
+    await this.loadOfertas(); // carga las ofertas
   }
 
+  // metodo para cargar usuarios desde firestore
   async loadUsuarios() {
-    try {
-      const { getFirestore, collection, getDocs } = await import(
-        'firebase/firestore'
-      );
-      const db = getFirestore();
-      const usuariosRef = collection(db, 'users'); // 👈 tu colección es 'users'
-      const querySnapshot = await getDocs(usuariosRef);
-
-      this.usuarios = querySnapshot.docs.map((doc) => {
-        return {
-          id: doc.id,
-          ...(doc.data() as any),
-        };
-      });
-    } catch (error) {
-      console.error('Error cargando usuarios:', error);
-    }
+    const db = getFirestore(); // obtiene la instancia de firestore
+    const usersSnapshot = await getDocs(collection(db, 'users')); // obtiene documentos de la coleccion 'users'
+    this.usuarios = usersSnapshot.docs.map((doc) => ({
+      id: doc.id, // id del documento
+      ...doc.data(), // datos del documento
+    }));
   }
 
+  // metodo para cargar ofertas desde firestore
+  async loadOfertas() {
+    const db = getFirestore(); // obtiene la instancia de firestore
+    const ofertasSnapshot = await getDocs(collection(db, 'ofertas')); // obtiene documentos de la coleccion 'ofertas'
+    this.ofertas = ofertasSnapshot.docs.map((doc) => ({
+      id: doc.id, // id del documento
+      ...doc.data(), // datos del documento
+    }));
+  }
+
+  // metodo para eliminar un usuario
   async eliminarUsuario(user: any) {
-    const confirmacion = confirm(
-      `¿Estás seguro de eliminar a ${user.fullName}?`
-    );
-
-    if (!confirmacion) {
-      return;
-    }
-
-    try {
-      const { getFirestore, doc, deleteDoc } = await import(
-        'firebase/firestore'
-      );
-      const db = getFirestore();
-      const userRef = doc(db, 'users', user.id); // 'users' es tu colección
-      await deleteDoc(userRef);
-
-      console.log('Usuario eliminado correctamente.');
-
-      // 🔥 Recargar usuarios después de eliminar
-      await this.loadUsuarios();
-    } catch (error) {
-      console.error('Error al eliminar usuario:', error);
+    // confirmacion antes de eliminar
+    if (confirm(`Are you sure you want to delete ${user.fullName}?`)) {
+      const db = getFirestore(); // obtiene la instancia de firestore
+      await deleteDoc(doc(db, 'users', user.id)); // elimina el documento por id
+      // actualiza el array de usuarios eliminando el usuario eliminado
+      this.usuarios = this.usuarios.filter((u) => u.id !== user.id);
     }
   }
 
-  async bloquearUsuario(user: any) {
-    const confirmacion = confirm(`¿Quieres bloquear a ${user.fullName}?`);
-
-    if (!confirmacion) {
-      return;
-    }
-
-    try {
-      const { getFirestore, doc, updateDoc } = await import(
-        'firebase/firestore'
-      );
-      const db = getFirestore();
-      const userRef = doc(db, 'users', user.id);
-
-      await updateDoc(userRef, {
-        role: 'bloqueado',
-      });
-
-      console.log('Usuario bloqueado correctamente.');
-
-      // 🔥 Recargar usuarios
-      await this.loadUsuarios();
-    } catch (error) {
-      console.error('Error al bloquear usuario:', error);
-    }
-  }
-
+  // metodo para eliminar una oferta
   async eliminarOferta(oferta: any) {
-    const confirmacion = confirm(
-      `¿Estás seguro de eliminar la oferta "${oferta.titulo}"?`
-    );
-
-    if (!confirmacion) {
-      return;
-    }
-
-    try {
-      const { getFirestore, doc, deleteDoc } = await import(
-        'firebase/firestore'
-      );
-      const db = getFirestore();
-      const ofertaRef = doc(db, 'ofertas', oferta.id); // 'ofertas' es tu colección
-      await deleteDoc(ofertaRef);
-
-      console.log('Oferta eliminada correctamente.');
-
-      // 🔥 Recargar ofertas después de eliminar
-      await this.loadOfertas();
-    } catch (error) {
-      console.error('Error al eliminar oferta:', error);
+    // confirmacion antes de eliminar
+    if (
+      confirm(`Are you sure you want to delete the offer "${oferta.titulo}"?`)
+    ) {
+      const db = getFirestore(); // obtiene la instancia de firestore
+      await deleteDoc(doc(db, 'ofertas', oferta.id)); // elimina el documento por id
+      // actualiza el array de ofertas eliminando la oferta eliminada
+      this.ofertas = this.ofertas.filter((o) => o.id !== oferta.id);
     }
   }
 
-  setView(v: 'usuarios' | 'ofertas') {
-    this.view = v;
+  // metodo para cambiar la vista activa
+  setView(newView: 'usuarios' | 'ofertas') {
+    this.view = newView;
+  }
+
+  // metodo para navegar a la pagina de inicio
+  goBack() {
+    this.router.navigate(['/home']);
   }
 }

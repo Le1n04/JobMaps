@@ -1,22 +1,31 @@
+// importacion de decoradores y clases de angular
 import { Component, Input, OnInit, EventEmitter, Output } from '@angular/core';
+// importacion de modulos comunes de angular
 import { CommonModule } from '@angular/common';
 import { NgIf } from '@angular/common';
+// importacion de modulo de iconos de angular material
 import { MatIconModule } from '@angular/material/icon';
+// importacion del servicio de snackbar para notificaciones
 import { MatSnackBar } from '@angular/material/snack-bar';
+// importacion de servicios personalizados
 import { FavoritosService } from '../../services/favoritos.service';
 import { AplicacionesService } from '../../services/aplicaciones.service';
+// importacion de autenticacion y almacenamiento de firebase
 import { getAuth } from '@angular/fire/auth';
 import { getDownloadURL, getStorage, ref } from 'firebase/storage';
+// importacion del tipo oferta
 import { Oferta } from '../../services/job.service';
 
+// decorador que define las propiedades del componente
 @Component({
-  selector: 'app-oferta-detalle',
-  standalone: true,
-  imports: [CommonModule, NgIf, MatIconModule],
-  templateUrl: './oferta-detalle.component.html',
-  styleUrls: ['./oferta-detalle.component.scss'],
+  selector: 'app-oferta-detalle', // selector para usar el componente en html
+  standalone: true, // componente independiente
+  imports: [CommonModule, NgIf, MatIconModule], // modulos importados
+  templateUrl: './oferta-detalle.component.html', // ruta del template html
+  styleUrls: ['./oferta-detalle.component.scss'], // ruta de los estilos
 })
 export class OfertaDetalleComponent implements OnInit {
+  // propiedades de entrada para configurar el componente
   @Input() titulo = '';
   @Input() descripcion = '';
   @Input() salario = 0;
@@ -24,24 +33,29 @@ export class OfertaDetalleComponent implements OnInit {
   @Input() inicio = '';
   @Input() logo = '';
   @Input() idOferta = '';
-  @Input() empresaId = ''; // 🆕
+  @Input() empresaId = '';
   @Input() onCerrar: () => void = () => {};
+  // eventos de salida para emitir acciones al componente padre
   @Output() onEliminarFavorito = new EventEmitter<string>();
   @Output() onOfertaEliminada = new EventEmitter<string>();
   @Output() onEditarOferta = new EventEmitter<Oferta & { id: string }>();
 
+  // variables de estado interno
   favorito: boolean = false;
   yaAplicado: boolean = false;
   aplicando: boolean = false;
   esCreador: boolean = false;
 
+  // inyeccion de dependencias: servicios y snackbar
   constructor(
     private favoritosService: FavoritosService,
     private aplicacionesService: AplicacionesService,
     private snackbar: MatSnackBar
   ) {}
 
+  // metodo que se ejecuta al iniciar el componente
   async ngOnInit(): Promise<void> {
+    // verifica si la oferta esta en favoritos
     if (this.idOferta) {
       this.favorito = await this.favoritosService.isFavorito(this.idOferta);
       this.yaAplicado = await this.aplicacionesService.yaHaAplicado(
@@ -49,8 +63,8 @@ export class OfertaDetalleComponent implements OnInit {
       );
     }
 
+    // obtiene el usuario autenticado y verifica si es el creador de la oferta
     const auth = getAuth();
-
     auth.onAuthStateChanged((user) => {
       if (user && user.uid === this.empresaId) {
         this.esCreador = true;
@@ -58,6 +72,7 @@ export class OfertaDetalleComponent implements OnInit {
     });
   }
 
+  // metodo para emitir el evento de edicion de oferta
   editarOferta() {
     this.onEditarOferta.emit({
       id: this.idOferta,
@@ -68,13 +83,14 @@ export class OfertaDetalleComponent implements OnInit {
       inicio: this.inicio,
       logo: this.logo,
       empresaId: this.empresaId,
-      ubicacion: undefined!, // ignora esto, solo para tipado
+      ubicacion: undefined!, // ignorado para tipado
       creadaEn: '',
     });
 
-    this.onCerrar(); // cerrar modal
+    this.onCerrar(); // cierra el modal
   }
 
+  // metodo para confirmar la eliminacion de una oferta
   confirmarEliminar() {
     this.snackbar
       .open('Are you sure you want to delete this?', 'Confirm', {
@@ -86,6 +102,7 @@ export class OfertaDetalleComponent implements OnInit {
       });
   }
 
+  // metodo para eliminar una oferta de la base de datos
   async eliminarOferta() {
     try {
       const db = (await import('@angular/fire/firestore')).getFirestore();
@@ -97,8 +114,8 @@ export class OfertaDetalleComponent implements OnInit {
         panelClass: ['snackbar-success'],
       });
 
-      this.onOfertaEliminada.emit(this.idOferta); // 🔥 Notificamos que se ha borrado
-      this.onCerrar(); // Cerramos el modal
+      this.onOfertaEliminada.emit(this.idOferta); // emite que se ha eliminado
+      this.onCerrar(); // cierra el modal
     } catch (error) {
       console.error('Error while deleting the post:', error);
       this.snackbar.open('Error while deleting the post.', 'Close', {
@@ -107,6 +124,7 @@ export class OfertaDetalleComponent implements OnInit {
     }
   }
 
+  // metodo para aplicar a una oferta
   async aplicar() {
     if (this.yaAplicado || this.aplicando) return;
 
@@ -127,10 +145,10 @@ export class OfertaDetalleComponent implements OnInit {
     const fileRef = ref(storage, cvPath);
 
     try {
-      // ✅ Comprobar si el CV existe
+      // verifica si el cv existe en el almacenamiento
       await getDownloadURL(fileRef);
 
-      // ✅ Aplicar a la oferta y enviar notificación
+      // aplica a la oferta y envia notificacion
       await this.aplicacionesService.aplicarAOferta(
         this.idOferta,
         this.empresaId,
@@ -158,6 +176,7 @@ export class OfertaDetalleComponent implements OnInit {
     this.aplicando = false;
   }
 
+  // metodo para alternar el estado de favorito
   toggleFavorito() {
     this.favorito = !this.favorito;
 

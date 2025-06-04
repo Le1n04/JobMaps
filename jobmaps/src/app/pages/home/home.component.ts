@@ -1,23 +1,26 @@
+// importacion de decoradores y modulos de angular
 import { Component, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, NgIf, NgFor, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
+// importacion de servicios personalizados
 import { AuthService } from '../../services/auth.service';
-import { UserService } from '../../services/user.service';
 import { JobService, Oferta } from '../../services/job.service';
 import { SnackbarService } from '../../services/snackbar.service';
 import { OfertaDetalleComponent } from '../../components/oferta-detalle/oferta-detalle.component';
 import { NotificacionesEmpresaComponent } from '../notificaciones-empresa/notificaciones-empresa.component';
 import { BottomNavComponent } from '../../components/bottom-nav/bottom-nav.component';
-
+import { UserService } from '../../services/user.service';
+// importacion de leaflet para mapas
 import * as L from 'leaflet';
 
+// decorador que define las propiedades del componente
 @Component({
-  selector: 'app-home',
-  standalone: true,
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.scss',
+  selector: 'app-home', // selector para usar el componente en html
+  standalone: true, // componente independiente
+  templateUrl: './home.component.html', // ruta del template html
+  styleUrl: './home.component.scss', // ruta del archivo de estilos
   imports: [
     CommonModule,
     NgIf,
@@ -30,37 +33,39 @@ import * as L from 'leaflet';
   ],
 })
 export class HomeComponent implements AfterViewInit {
+  // variables para gestionar el estado de la pagina
   view: 'map' | 'list' = 'map';
   activeTab: string = 'browse';
   isBrowser: boolean;
   mostrarPopup = false;
-  mostrarPopupEdicion = false; // Popup para EDITAR oferta
+  mostrarPopupEdicion = false;
   map!: L.Map;
   marcadores: L.Marker[] = [];
   direccionTexto: string = '';
   direccionInvalida = false;
   selectedOferta: (Oferta & { id: string }) | null = null;
-  edicionOferta: (Oferta & { id: string }) | null = null; // Editar
+  edicionOferta: (Oferta & { id: string }) | null = null;
   titulo: string = '';
   descripcion: string = '';
   salario: number = 0;
   tipoContrato: string = '';
   inicio: string = '';
   logoUrl: string = '';
-  //modoEdicion: boolean = false;
   jobs: (Oferta & { id: string })[] = [];
 
+  // inyeccion de dependencias
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
     private jobService: JobService,
     private authService: AuthService,
     private snackbar: SnackbarService,
-    private userService: UserService,
+    public userService: UserService,
     private router: Router
   ) {
-    this.isBrowser = isPlatformBrowser(platformId);
+    this.isBrowser = isPlatformBrowser(platformId); // verifica si es navegador
   }
 
+  // metodo para convertir direccion a coordenadas usando openstreetmap
   async convertirDireccionACoordenadas(
     direccion: string
   ): Promise<{ lat: number; lng: number } | null> {
@@ -85,6 +90,7 @@ export class HomeComponent implements AfterViewInit {
     }
   }
 
+  // metodo para crear una nueva oferta
   async crearOferta() {
     this.direccionInvalida = false;
 
@@ -120,16 +126,19 @@ export class HomeComponent implements AfterViewInit {
     }
   }
 
+  // metodo para cerrar el modal de oferta
   cerrarModalOferta = () => {
     this.selectedOferta = null;
     this.mostrarPopup = false;
   };
 
+  // metodo para cerrar el popup de edicion
   cerrarPopupEdicion() {
     this.edicionOferta = null;
     this.mostrarPopupEdicion = false;
   }
 
+  // metodo que se ejecuta cuando una oferta es eliminada
   onOfertaEliminada() {
     this.selectedOferta = null;
     if (this.view !== 'map') {
@@ -138,6 +147,7 @@ export class HomeComponent implements AfterViewInit {
     this.loadJobs();
   }
 
+  // metodo para limpiar el formulario
   resetFormulario() {
     this.titulo = '';
     this.descripcion = '';
@@ -151,6 +161,7 @@ export class HomeComponent implements AfterViewInit {
     this.edicionOferta = null;
   }
 
+  // metodo para cargar las ofertas y actualizar el mapa
   async loadJobs() {
     const snapshot = await this.jobService.getOfertas();
     this.jobs = snapshot.map((doc: any) => ({
@@ -184,6 +195,7 @@ export class HomeComponent implements AfterViewInit {
     }
   }
 
+  // metodo que se ejecuta despues de que la vista esta inicializada
   async ngAfterViewInit(): Promise<void> {
     if (!this.isBrowser) return;
 
@@ -205,11 +217,13 @@ export class HomeComponent implements AfterViewInit {
     await this.loadJobs();
   }
 
+  // metodo para abrir el formulario de nueva oferta
   abrirFormularioOferta() {
     this.resetFormulario();
     this.mostrarPopup = true;
   }
 
+  // metodo para iniciar la edicion de una oferta
   editarOferta(oferta: Oferta & { id: string }) {
     this.edicionOferta = oferta;
     this.mostrarPopup = false;
@@ -221,13 +235,13 @@ export class HomeComponent implements AfterViewInit {
     this.tipoContrato = oferta.tipoContrato;
     this.inicio = oferta.inicio;
     this.logoUrl = oferta.logo;
-    this.direccionTexto = ''; // por ahora no editamos ubicación
+    this.direccionTexto = '';
   }
 
+  // metodo para cambiar la pestaña activa y navegar a la ruta correspondiente
   setActiveTab(tab: string) {
     this.activeTab = tab;
 
-    // Navegación a otras páginas si toca
     if (tab === 'profile') {
       this.router.navigate(['/profile-settings']);
     } else if (tab === 'favourites') {
@@ -235,25 +249,26 @@ export class HomeComponent implements AfterViewInit {
     } else if (tab === 'notifications') {
       this.router.navigate(['/notifications']);
     } else if (tab === 'browse') {
-      // Cuando vuelves a "browse", asegúrate de que el mapa se recalcula
       if (this.view === 'map' && this.map) {
         setTimeout(() => {
           this.map.invalidateSize();
-        }, 200); // pequeño delay para que se haya renderizado
+        }, 200);
       }
     }
   }
 
+  // metodo para cambiar entre la vista de mapa o lista
   setView(newView: 'map' | 'list') {
     this.view = newView;
 
     if (newView === 'map' && this.map) {
       setTimeout(() => {
         this.map.invalidateSize();
-      }, 200); // muy importante para que el mapa se refresque al volver
+      }, 200);
     }
   }
 
+  // metodo para guardar cambios en una oferta editada
   async guardarCambios() {
     if (!this.edicionOferta) return;
 
@@ -281,11 +296,18 @@ export class HomeComponent implements AfterViewInit {
     }
   }
 
+  // metodo para navegar al dashboard de administracion
+  irDashboardAdmin() {
+    this.router.navigate(['/admin']);
+  }
+
+  // metodo que se ejecuta al iniciar el componente
   async ngOnInit(): Promise<void> {
     await this.userService.usuarioCargado;
     await this.loadJobs();
   }
 
+  // getters para verificar el rol del usuario
   get isEmpresa() {
     return this.userService.role === 'empresa';
   }
@@ -294,6 +316,11 @@ export class HomeComponent implements AfterViewInit {
     return this.userService.role === 'desempleado';
   }
 
+  get isAdmin() {
+    return this.userService.role === 'admin';
+  }
+
+  // metodo para cerrar sesion
   logout() {
     this.authService.logout();
   }

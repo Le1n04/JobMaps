@@ -1,21 +1,23 @@
+// importacion de rutas y guards
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { noAuthGuard } from './guards/no-auth.guard';
 import { registrationFlowGuard } from './guards/registration-flow.guard';
-import { empresaOnlyGuard } from './guards/empresa-only.guard';
+import { AdminGuard } from './guards/admin.guard';
 
+// definicion de las rutas principales de la aplicacion
 export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () =>
       import('./pages/home/home.component').then((m) => m.HomeComponent),
-    canActivate: [authGuard],
+    canActivate: [authGuard], // requiere estar autenticado
   },
   {
     path: 'login',
     loadComponent: () =>
       import('./pages/login/login.component').then((m) => m.LoginComponent),
-    canActivate: [noAuthGuard],
+    canActivate: [noAuthGuard], // solo accesible si no estas autenticado
   },
   {
     path: 'favoritos',
@@ -23,7 +25,7 @@ export const routes: Routes = [
       import('./pages/favoritos-page/favoritos-page.component').then(
         (m) => m.FavoritosPageComponent
       ),
-    canActivate: [authGuard],
+    canActivate: [authGuard], // requiere estar autenticado
   },
   {
     path: 'admin',
@@ -31,6 +33,7 @@ export const routes: Routes = [
       import('./components/admin/admin-dashboard.component').then(
         (m) => m.AdminDashboardComponent
       ),
+    canActivate: [AdminGuard], // requiere ser administrador
   },
   {
     path: 'notifications',
@@ -38,6 +41,7 @@ export const routes: Routes = [
       import(
         './pages/notificaciones-empresa/notificaciones-empresa.component'
       ).then((m) => m.NotificacionesEmpresaComponent),
+    // sin guard: acceso libre
   },
   {
     path: 'email-login',
@@ -45,7 +49,7 @@ export const routes: Routes = [
       import('./pages/email-login/email-login.component').then(
         (m) => m.EmailLoginComponent
       ),
-    canActivate: [noAuthGuard],
+    canActivate: [noAuthGuard], // solo accesible si no estas autenticado
   },
   {
     path: 'email-password',
@@ -53,7 +57,7 @@ export const routes: Routes = [
       import('./pages/email-password/email-password.component').then(
         (m) => m.EmailPasswordComponent
       ),
-    canActivate: [registrationFlowGuard],
+    canActivate: [registrationFlowGuard], // requiere completar flujo de registro
   },
   {
     path: 'profile-settings',
@@ -61,7 +65,7 @@ export const routes: Routes = [
       import('./pages/profile-settings/profile-settings.component').then(
         (m) => m.ProfileSettingsComponent
       ),
-    canActivate: [authGuard],
+    canActivate: [authGuard], // requiere estar autenticado
   },
   {
     path: 'register-step1',
@@ -69,7 +73,7 @@ export const routes: Routes = [
       import('./pages/register-step1/register-step1.component').then(
         (m) => m.RegisterStep1Component
       ),
-    canActivate: [registrationFlowGuard],
+    canActivate: [registrationFlowGuard], // requiere completar flujo de registro
   },
   {
     path: 'register-location',
@@ -77,7 +81,7 @@ export const routes: Routes = [
       import('./pages/register-location/register-location.component').then(
         (m) => m.RegisterLocationComponent
       ),
-    canActivate: [registrationFlowGuard],
+    canActivate: [registrationFlowGuard], // requiere completar flujo de registro
   },
   {
     path: 'register-password',
@@ -85,7 +89,7 @@ export const routes: Routes = [
       import('./pages/register-password/register-password.component').then(
         (m) => m.RegisterPasswordComponent
       ),
-    canActivate: [registrationFlowGuard],
+    canActivate: [registrationFlowGuard], // requiere completar flujo de registro
   },
   {
     path: 'select-location',
@@ -93,7 +97,7 @@ export const routes: Routes = [
       import(
         './pages/select-location/select-location/select-location.component'
       ).then((m) => m.SelectLocationComponent),
-    canActivate: [registrationFlowGuard],
+    canActivate: [registrationFlowGuard], // requiere completar flujo de registro
   },
   {
     path: 'crear-oferta',
@@ -101,11 +105,13 @@ export const routes: Routes = [
       import('./pages/crear-oferta/crear-oferta.component').then(
         (m) => m.CrearOfertaComponent
       ),
-    canActivate: [authGuard], // y puedes añadir roleGuard si quieres limitar a empresas
+    canActivate: [authGuard], // requiere estar autenticado
+    // se puede añadir un roleGuard para limitar a empresas
   },
   {
     path: '**',
     loadComponent: () =>
       import('./pages/login/login.component').then((m) => m.LoginComponent),
+    // ruta comodin: redirige a login
   },
 ];

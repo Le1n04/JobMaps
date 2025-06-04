@@ -1,30 +1,37 @@
+// importacion de decoradores y modulos de angular
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+// importacion de servicios personalizados
 import { UserService } from '../../services/user.service';
+// importacion de servicio de rutas de angular
 import { ActivatedRoute } from '@angular/router';
 
+// decorador que define las propiedades del componente
 @Component({
-  selector: 'app-register-step1',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './register-step1.component.html',
+  selector: 'app-register-step1', // selector para usar el componente en html
+  standalone: true, // componente independiente
+  imports: [CommonModule, FormsModule], // modulos importados
+  templateUrl: './register-step1.component.html', // ruta del template html
   styleUrls: ['./register-step1.component.scss'],
 })
 export class RegisterStep1Component {
+  // variables para almacenar los datos del formulario
   fullName: string = '';
   age: number | null = null;
   country: string = '';
   acceptedTerms: boolean = false;
   role: string = '';
 
+  // inyeccion de dependencias: router, userService y activatedRoute
   constructor(
     private router: Router,
     private userService: UserService,
     private route: ActivatedRoute
   ) {}
 
+  // metodo que se ejecuta al iniciar el componente
   ngOnInit() {
     const email = this.route.snapshot.queryParamMap.get('email');
     if (email) {
@@ -33,6 +40,7 @@ export class RegisterStep1Component {
     }
   }
 
+  // getter para validar que todos los campos del formulario esten completos
   get formValid(): boolean {
     return (
       this.fullName.trim().length > 0 &&
@@ -44,6 +52,7 @@ export class RegisterStep1Component {
     );
   }
 
+  // metodo para continuar al siguiente paso del registro
   continue() {
     if (!this.formValid) return;
 
@@ -55,6 +64,7 @@ export class RegisterStep1Component {
     this.router.navigate(['/register-location']);
   }
 
+  // metodo para volver a la pagina anterior
   goBack() {
     this.router.navigate(['/email-login']);
   }

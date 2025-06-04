@@ -1,3 +1,4 @@
+// importacion de decoradores y funciones de firebase
 import { Injectable } from '@angular/core';
 import { getAuth, onAuthStateChanged, User } from '@angular/fire/auth';
 import {
@@ -9,10 +10,12 @@ import {
 } from 'firebase/firestore';
 import { BehaviorSubject } from 'rxjs';
 
+// decorador que define el servicio como disponible en toda la aplicacion
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
+  // objeto para almacenar los datos del usuario
   private _userData: {
     email?: string;
     fullName?: string;
@@ -27,11 +30,15 @@ export class UserService {
     cvUrl?: string;
   } = {};
 
+  // uid del usuario
   private _uid: string = '';
+  // observable para notificar cambios en los datos del usuario
   private userData$ = new BehaviorSubject(this._userData);
+  // promesa para indicar cuando se han cargado los datos del usuario
   usuarioCargado!: Promise<void>;
   private resolveUsuarioCargado!: () => void;
 
+  // constructor: inicializa la promesa y carga los datos del usuario
   constructor() {
     this.usuarioCargado = new Promise((resolve) => {
       this.resolveUsuarioCargado = resolve;
@@ -39,6 +46,7 @@ export class UserService {
     this.loadUserFromFirebase();
   }
 
+  // metodo para cargar los datos del usuario desde firebase
   async loadUserFromFirebase() {
     const auth = getAuth();
     const db = getFirestore();
@@ -67,37 +75,37 @@ export class UserService {
           this._userData.acceptedTerms = data['acceptedTerms'] ?? false;
         }
 
-        this.userData$.next(this._userData); // Notificar a los observadores
+        this.userData$.next(this._userData); // notifica a los observadores
       } else {
         console.warn('No user logged in');
       }
-      this.resolveUsuarioCargado();
+      this.resolveUsuarioCargado(); // resuelve la promesa cuando termina
     });
-    
   }
 
+  // getter para obtener el cvUrl
   get cvUrl(): string {
     return (this._userData as any).cvUrl ?? '';
   }
 
-
-  // 🔁 Observable (opcional)
+  // getter para el observable de los datos del usuario
   get userDataObservable() {
     return this.userData$.asObservable();
   }
 
+  // metodo para crear el documento de usuario en firestore
   async createUserDocument(uid: string, data: any) {
     const db = getFirestore();
     const userRef = doc(db, 'users', uid);
     await setDoc(userRef, data);
   }
 
-  // 🔐 UID del usuario actual
+  // getter para el uid del usuario
   get uid() {
     return this._uid;
   }
 
-  // 💾 Actualizar Firestore
+  // metodo para actualizar los datos del usuario en firestore
   async updateUserInFirestore(
     uid: string,
     newData: Partial<typeof this._userData>
@@ -106,12 +114,12 @@ export class UserService {
     const docRef = doc(db, 'users', uid);
     await updateDoc(docRef, newData);
 
-    // También actualizamos localmente
+    // actualiza localmente
     this._userData = { ...this._userData, ...newData };
     this.userData$.next(this._userData);
   }
 
-  // Getters y setters
+  // getters y setters para los datos del usuario
   set email(email: string) {
     this._userData.email = email;
   }
@@ -120,7 +128,7 @@ export class UserService {
     return this._userData.email ?? 'no@email.error';
   }
 
-  set role(role: 'empresa' | 'desempleado') {
+  set role(role: 'empresa' | 'desempleado' | 'admin') {
     this._userData.role = role;
   }
 
@@ -172,6 +180,7 @@ export class UserService {
     return this._userData;
   }
 
+  // metodo para limpiar los datos del usuario
   clear() {
     this._userData = {};
     this._uid = '';

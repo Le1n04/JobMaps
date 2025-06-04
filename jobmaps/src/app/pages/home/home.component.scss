@@ -7,6 +7,27 @@
   overflow: hidden;
 }
 
+.fab-admin {
+  position: fixed;
+  bottom: 80px;
+  left: 20px; /* ⬅️ Está al lado izquierdo */
+  background-color: #6a1b9a;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+
+  mat-icon {
+    font-size: 28px;
+  }
+}
+
 .error-text {
   color: #d32f2f;
   font-size: 0.9rem;
@@ -283,7 +304,7 @@
 }
 
 .popup-buttons button[type="submit"] {
-  background-color: #007bff;
+  background-color: #00796b;
   color: white;
 }
 

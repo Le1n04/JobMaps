@@ -1,3 +1,4 @@
+// importacion de decoradores y servicios de angular y firebase
 import { Injectable } from '@angular/core';
 import { UserService } from './user.service';
 import { SnackbarService } from './snackbar.service';
@@ -13,23 +14,28 @@ import {
 } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 
+// decorador que define el servicio como disponible en toda la aplicacion
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  // variable privada para almacenar el usuario autenticado
   private _user: User | null = null;
 
+  // inyeccion de dependencias: auth, router, snackbar y userService
   constructor(
     private auth: Auth,
     private router: Router,
     private snackbar: SnackbarService,
     private userService: UserService
   ) {
+    // suscripcion al estado de autenticacion
     onAuthStateChanged(this.auth, (user) => {
       this._user = user;
     });
   }
 
+  // metodo para iniciar sesion con google
   async loginWithGoogle() {
     try {
       const provider = new GoogleAuthProvider();
@@ -50,7 +56,7 @@ export class AuthService {
               'No se pudo obtener ubicación, se usará la predeterminada:',
               error
             );
-            // Guardar ubicación por defecto (Málaga centro)
+            // guarda ubicacion por defecto (malaga centro)
             this.userService.setLocation(36.7213, -4.4214);
             this.router.navigate(['/home']);
           },
@@ -70,6 +76,7 @@ export class AuthService {
     }
   }
 
+  // metodo para registrar usuario con email y contraseña
   async registerWithEmailAndPassword(password: string) {
     try {
       const email = this.userService.email;
@@ -92,6 +99,7 @@ export class AuthService {
     }
   }
 
+  // metodo para cerrar sesion
   logout() {
     return signOut(this.auth).then(() => {
       this._user = null;
@@ -99,10 +107,12 @@ export class AuthService {
     });
   }
 
+  // getter para obtener el usuario actual
   get currentUser(): User | null {
     return this._user;
   }
 
+  // metodo para verificar si hay usuario autenticado
   isAuthenticated(): boolean {
     return this._user !== null;
   }

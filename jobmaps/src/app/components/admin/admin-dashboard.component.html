@@ -1,65 +1,53 @@
 <div class="admin-dashboard">
-  <!-- Menú superior -->
+  <!-- Header -->
+  <div class="admin-header">
+    <button (click)="goBack()" aria-label="Go back">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>Admin Dashboard</h2>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- Menu -->
   <div class="admin-menu">
     <button (click)="setView('usuarios')" [class.active]="view === 'usuarios'">
-      Usuarios
+      Users
     </button>
     <button (click)="setView('ofertas')" [class.active]="view === 'ofertas'">
-      Ofertas
+      Offers
     </button>
   </div>
 
-  <!-- Contenido -->
+  <!-- Content -->
   <div class="admin-content">
-    <!-- Lista de Usuarios -->
     <div *ngIf="view === 'usuarios'">
-      <h2>Gestión de Usuarios</h2>
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of usuarios">
-            <td>{{ user.fullName }}</td>
-            <td>{{ user.email || "N/A" }}</td>
-            <td>{{ user.role }}</td>
-            <td>
-              <button (click)="bloquearUsuario(user)">Bloquear</button>
-              <button (click)="eliminarUsuario(user)">Eliminar</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div *ngFor="let user of usuarios" class="user-card">
+        <div class="info">
+          <h3>{{ user.fullName }}</h3>
+          <p>Edad: {{ user.age || 'N/A' }}</p>
+          <p>Rol: {{ user.role }}</p>
+        </div>
+        <div class="actions">
+          <button (click)="eliminarUsuario(user)" aria-label="Eliminar usuario">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Lista de Ofertas -->
     <div *ngIf="view === 'ofertas'">
-      <h2>Gestión de Ofertas</h2>
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Título</th>
-            <th>Empresa</th>
-            <th>Salario</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let oferta of ofertas">
-            <td>{{ oferta.titulo }}</td>
-            <td>{{ oferta.empresaId }}</td>
-            <td>{{ oferta.salario }} €</td>
-            <td>
-              <button (click)="eliminarOferta(oferta)">Eliminar</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div *ngFor="let oferta of ofertas" class="oferta-card">
+        <div class="info">
+          <h3>{{ oferta.titulo }}</h3>
+          <p>Empresa ID: {{ oferta.empresaId }}</p>
+          <p>Salario: {{ oferta.salario }} €</p>
+        </div>
+        <div class="actions">
+          <button (click)="eliminarOferta(oferta)" aria-label="Eliminar oferta">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

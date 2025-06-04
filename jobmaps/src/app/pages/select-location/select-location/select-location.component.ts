@@ -1,21 +1,28 @@
+// importacion de decoradores y modulos de angular
 import { Component, AfterViewInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+// importacion de leaflet para mapas
 import * as L from 'leaflet';
+// importacion del servicio de usuario
 import { UserService } from '../../../services/user.service';
 
+// decorador que define las propiedades del componente
 @Component({
-  selector: 'app-select-location',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './select-location.component.html',
+  selector: 'app-select-location', // selector para usar el componente en html
+  standalone: true, // componente independiente
+  imports: [CommonModule], // modulos importados
+  templateUrl: './select-location.component.html', // ruta del template html
   styleUrls: ['./select-location.component.scss'],
 })
 export class SelectLocationComponent implements AfterViewInit {
+  // variables para el mapa y el marcador
   private map!: L.Map;
   private marker!: L.Marker;
+  // variable para saber desde donde se llama al componente
   from: 'profile' | 'register' | 'crear-oferta' = 'register';
 
+  // inyeccion de dependencias: route, router, userService y location
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -23,6 +30,7 @@ export class SelectLocationComponent implements AfterViewInit {
     private location: Location
   ) {}
 
+  // metodo que se ejecuta al iniciar el componente
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       const origen = params['from'];
@@ -32,6 +40,7 @@ export class SelectLocationComponent implements AfterViewInit {
     });
   }
 
+  // metodo que se ejecuta despues de que la vista esta inicializada
   ngAfterViewInit(): void {
     const customIcon = L.icon({
       iconUrl: 'assets/marker.png',
@@ -40,7 +49,7 @@ export class SelectLocationComponent implements AfterViewInit {
       popupAnchor: [0, -32],
     });
 
-    const fallbackCoords: L.LatLngExpression = [36.7213, -4.4214];
+    const fallbackCoords: L.LatLngExpression = [36.7213, -4.4214]; // coordenadas por defecto
     this.map = L.map('manual-map');
 
     L.tileLayer(
@@ -50,6 +59,7 @@ export class SelectLocationComponent implements AfterViewInit {
       }
     ).addTo(this.map);
 
+    // obtiene la ubicacion actual del usuario
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const coords: L.LatLngExpression = [
@@ -71,15 +81,17 @@ export class SelectLocationComponent implements AfterViewInit {
       }
     );
 
+    // permite cambiar la posicion del marcador al hacer click en el mapa
     this.map.on('click', (e: L.LeafletMouseEvent) => {
       this.marker.setLatLng(e.latlng);
     });
   }
 
+  // metodo para confirmar la ubicacion seleccionada
   confirmarUbicacion() {
     const coords = this.marker.getLatLng();
 
-    // Guardar ubicación en localStorage (temporal)
+    // guarda la ubicacion en localstorage temporalmente
     localStorage.setItem(
       'ubicacionOferta',
       JSON.stringify({
@@ -88,6 +100,7 @@ export class SelectLocationComponent implements AfterViewInit {
       })
     );
 
+    // redirige segun desde donde se abrio el componente
     if (this.from === 'crear-oferta') {
       this.router.navigate(['/home']);
     } else if (this.from === 'profile') {
@@ -99,6 +112,7 @@ export class SelectLocationComponent implements AfterViewInit {
     }
   }
 
+  // metodo para volver a la pagina anterior
   goBack() {
     this.location.back();
   }

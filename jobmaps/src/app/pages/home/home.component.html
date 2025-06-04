@@ -61,6 +61,16 @@
     +
   </button>
 
+  <!-- Botón flotante solo para Admin -->
+  <button
+    *ngIf="userService.role && isAdmin && activeTab === 'browse'"
+    class="fab-admin"
+    (click)="irDashboardAdmin()"
+    aria-label="Admin panel"
+  >
+    <mat-icon>admin_panel_settings</mat-icon>
+  </button>
+
   <!-- Popup para CREAR oferta -->
   <div class="popup-overlay" *ngIf="mostrarPopup">
     <div class="popup">
