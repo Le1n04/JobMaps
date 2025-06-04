@@ -26,11 +26,18 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-    path : 'notifications',
+    path: 'admin',
     loadComponent: () =>
-      import('./pages/notificaciones-empresa/notificaciones-empresa.component').then(
-        (m) => m.NotificacionesEmpresaComponent
+      import('./components/admin/admin-dashboard.component').then(
+        (m) => m.AdminDashboardComponent
       ),
+  },
+  {
+    path: 'notifications',
+    loadComponent: () =>
+      import(
+        './pages/notificaciones-empresa/notificaciones-empresa.component'
+      ).then((m) => m.NotificacionesEmpresaComponent),
   },
   {
     path: 'email-login',

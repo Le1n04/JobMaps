@@ -19,7 +19,7 @@ export class UserService {
     age?: number;
     country?: string;
     acceptedTerms?: boolean;
-    role?: 'empresa' | 'desempleado';
+    role?: 'empresa' | 'desempleado' | 'admin';
     location?: {
       lat: number;
       lng: number;
@@ -124,7 +124,7 @@ export class UserService {
     this._userData.role = role;
   }
 
-  get role(): 'empresa' | 'desempleado' {
+  get role(): 'empresa' | 'desempleado' | 'admin' {
     return this._userData.role ?? 'desempleado';
   }
 

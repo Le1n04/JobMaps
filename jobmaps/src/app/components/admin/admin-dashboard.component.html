@@ -1,0 +1,65 @@
+<div class="admin-dashboard">
+  <!-- Menú superior -->
+  <div class="admin-menu">
+    <button (click)="setView('usuarios')" [class.active]="view === 'usuarios'">
+      Usuarios
+    </button>
+    <button (click)="setView('ofertas')" [class.active]="view === 'ofertas'">
+      Ofertas
+    </button>
+  </div>
+
+  <!-- Contenido -->
+  <div class="admin-content">
+    <!-- Lista de Usuarios -->
+    <div *ngIf="view === 'usuarios'">
+      <h2>Gestión de Usuarios</h2>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of usuarios">
+            <td>{{ user.fullName }}</td>
+            <td>{{ user.email || "N/A" }}</td>
+            <td>{{ user.role }}</td>
+            <td>
+              <button (click)="bloquearUsuario(user)">Bloquear</button>
+              <button (click)="eliminarUsuario(user)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Lista de Ofertas -->
+    <div *ngIf="view === 'ofertas'">
+      <h2>Gestión de Ofertas</h2>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Empresa</th>
+            <th>Salario</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let oferta of ofertas">
+            <td>{{ oferta.titulo }}</td>
+            <td>{{ oferta.empresaId }}</td>
+            <td>{{ oferta.salario }} €</td>
+            <td>
+              <button (click)="eliminarOferta(oferta)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
