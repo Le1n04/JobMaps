@@ -203,7 +203,7 @@ export class HomeComponent implements AfterViewInit {
 
     const { lat, lng } = this.userService.location;
 
-    this.map = L.map('map').setView([lat, lng], 13);
+    this.map = L.map('map', {zoomControl: false}).setView([lat, lng], 13);
 
     L.tileLayer(
       'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
@@ -211,6 +211,7 @@ export class HomeComponent implements AfterViewInit {
         attribution: '&copy; OpenStreetMap contributors &copy; Carto',
         subdomains: 'abcd',
         maxZoom: 19,
+        
       }
     ).addTo(this.map);
 
