@@ -238,6 +238,18 @@
   }
 }
 
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px; /* Ajusta el alto que necesites */
+}
+
+.logo-container img {
+  height: 40px; /* Ajusta para que el logo no sea muy grande */
+  object-fit: contain;
+}
+
 .popup-overlay {
   position: fixed;
   top: 0;
