@@ -61,7 +61,12 @@
                   "maximumError": "20kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "allowedCommonJsDependencies": [
+                "leaflet",
+                "@grpc/grpc-js",
+                "@grpc/proto-loader"
+              ]
             },
             "development": {
               "optimization": false,

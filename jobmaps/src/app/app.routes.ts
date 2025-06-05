@@ -41,7 +41,7 @@ export const routes: Routes = [
       import(
         './pages/notificaciones-empresa/notificaciones-empresa.component'
       ).then((m) => m.NotificacionesEmpresaComponent),
-    // sin guard: acceso libre
+    canActivate: [authGuard], // requiere estar autenticado
   },
   {
     path: 'email-login',

@@ -1,29 +1,32 @@
-// importacion de decoradores y clases de angular
-import { Injectable } from '@angular/core';
-// importacion de guardia y router de angular
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-// importacion del servicio de usuario
 import { UserService } from '../services/user.service';
+import { isPlatformBrowser } from '@angular/common';
 
-// decorador para indicar que el servicio esta disponible en toda la aplicacion
 @Injectable({
   providedIn: 'root',
 })
 export class AdminGuard implements CanActivate {
-  // inyeccion de dependencias: servicio de usuario y router
-  constructor(private userService: UserService, private router: Router) {}
+  constructor(
+    private userService: UserService,
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: any
+  ) {}
 
-  // metodo que determina si se puede activar la ruta, soporta operaciones asincronas
   async canActivate(): Promise<boolean> {
-    // espera a que el usuario este completamente cargado
+    // Si estamos en Server-Side Rendering (SSR)
+    if (!isPlatformBrowser(this.platformId)) {
+      // Si estamos en servidor, no intentar cargar el usuario
+      return false;
+    }
+
     await this.userService.usuarioCargado;
 
-    // verifica si el rol del usuario es admin
     if (this.userService.role === 'admin') {
-      return true; // permite el acceso
+      return true;
     } else {
-      this.router.navigate(['/home']); // redirige al home si no es admin
-      return false; // bloquea el acceso
+      this.router.navigate(['/home']);
+      return false;
     }
   }
 }
